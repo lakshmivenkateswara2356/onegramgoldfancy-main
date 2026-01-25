@@ -1,77 +1,109 @@
-const Banner = require("../models/banner.model");
 const cloudinary = require("../config/cloudinary");
+const pool = require("../config/db");
 
+// ---------------- ADD BANNER ----------------
 exports.addBanner = async (req, res) => {
   try {
-    const { title, paragraph, button_text } = req.body;
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
     if (!req.file) {
-      return res.status(400).json({ message: "Image is required" });
+      return res.status(400).json({ error: "Image is required" });
     }
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    const { title, paragraph, buttonText } = req.body;
+
+    // Upload image to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "banners" },
-        (err, result) => (err ? reject(err) : resolve(result))
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
       );
       stream.end(req.file.buffer);
     });
 
-    const banner = await Banner.create({
-      title,
-      paragraph,
-      button_text,
-      image: result.secure_url,
-      active: true,
-    });
+    const imageUrl = uploadResult.secure_url;
 
-    res.status(201).json(banner);
+    const dbResult = await pool.query(
+      `INSERT INTO banners (title, paragraph, button_text, image)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [title, paragraph, buttonText, imageUrl]
+    );
+
+    res.status(201).json(dbResult.rows[0]);
   } catch (err) {
-    console.error("Add banner error:", err);
+    console.error("ADD BANNER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
+// ---------------- GET BANNERS ----------------
 exports.getBanners = async (req, res) => {
   try {
-    const banners = await Banner.getAllBanners();
-    res.json(banners);
+    const result = await pool.query(
+      "SELECT * FROM banners ORDER BY id DESC"
+    );
+    res.json(result.rows);
   } catch (err) {
-    console.error("Fetch banners error:", err);
+    console.error("GET BANNER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
+// ---------------- UPDATE BANNER ----------------
 exports.updateBanner = async (req, res) => {
   try {
-    const { title, paragraph, button_text, active } = req.body;
-    const updateData = { title, paragraph, button_text, active };
+    const { title, paragraph, buttonText } = req.body;
+    let imageUrl;
 
     if (req.file) {
-      const result = await new Promise((resolve, reject) => {
+      const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: "banners" },
-          (err, result) => (err ? reject(err) : resolve(result))
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
         );
         stream.end(req.file.buffer);
       });
-      updateData.image = result.secure_url;
+
+      imageUrl = uploadResult.secure_url;
     }
 
-    const banner = await Banner.update(req.params.id, updateData);
-    res.json(banner);
+    const query = imageUrl
+      ? `UPDATE banners
+         SET title=$1, paragraph=$2, button_text=$3, image=$4
+         WHERE id=$5 RETURNING *`
+      : `UPDATE banners
+         SET title=$1, paragraph=$2, button_text=$3
+         WHERE id=$4 RETURNING *`;
+
+    const values = imageUrl
+      ? [title, paragraph, buttonText, imageUrl, req.params.id]
+      : [title, paragraph, buttonText, req.params.id];
+
+    const result = await pool.query(query, values);
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error("Update banner error:", err);
+    console.error("UPDATE BANNER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
+// ---------------- DELETE BANNER ----------------
 exports.deleteBanner = async (req, res) => {
   try {
-    await Banner.delete(req.params.id);
+    await pool.query("DELETE FROM banners WHERE id=$1", [
+      req.params.id,
+    ]);
     res.json({ message: "Banner deleted" });
   } catch (err) {
+    console.error("DELETE BANNER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

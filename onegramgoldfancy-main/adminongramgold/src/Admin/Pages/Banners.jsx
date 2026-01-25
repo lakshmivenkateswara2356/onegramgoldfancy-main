@@ -52,8 +52,8 @@ const Banners = () => {
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("paragraph", form.paragraph);
-    formData.append("button_text", form.buttonText);
-    formData.append("image", form.imageFile); // MUST be "image"
+    formData.append("buttonText", form.buttonText); // ✅ FIXED
+    formData.append("image", form.imageFile); // ✅ MUST be "image"
 
     try {
       setLoading(true);
@@ -73,8 +73,8 @@ const Banners = () => {
 
       fetchBanners();
     } catch (err) {
-      console.error("Add banner error:", err);
-      alert("Failed to upload banner");
+      console.error("Add banner error:", err.response?.data || err);
+      alert(err.response?.data?.error || "Failed to upload banner");
     } finally {
       setLoading(false);
     }

@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload");
+const bannerUpload = require("../middleware/bannerUpload");
 const BannerController = require("../controllers/banner.controller");
 
 router.get("/", BannerController.getBanners);
 
 router.post(
   "/",
-  upload.single("image"), // ✅ REQUIRED
+  bannerUpload.single("image"), // FIELD NAME MUST BE "image"
   BannerController.addBanner
 );
 
 router.put(
   "/:id",
-  upload.single("image"),
+  bannerUpload.single("image"),
   BannerController.updateBanner
 );
 
