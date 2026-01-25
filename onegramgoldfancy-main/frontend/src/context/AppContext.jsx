@@ -1,0 +1,200 @@
+import { createContext, useEffect, useState } from "react";
+import axios from "axios";
+
+export const AppContext = createContext(null);
+
+const AppProvider = ({ children }) => {
+  /* ------------------ UI ------------------ */
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  /* ------------------ USER ------------------ */
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  useEffect(() => {
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    else localStorage.removeItem("user");
+  }, [user]);
+
+  /* ------------------ GUEST ------------------ */
+  const [guest, setGuest] = useState(() => {
+    const saved = localStorage.getItem("guest");
+    return saved ? JSON.parse(saved) : { name: "", phone: "", address: "" };
+  });
+
+  const updateGuest = (data) => {
+    setGuest((prev) => ({ ...prev, ...data }));
+  };
+
+  useEffect(() => {
+    localStorage.setItem("guest", JSON.stringify(guest));
+  }, [guest]);
+
+  /* ------------------ CART ------------------ */
+  const [cart, setCart] = useState(() => {
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const addToCart = (product) => {
+    setCart((prev) => {
+      const exists = prev.find((i) => i.id === product.id);
+      if (exists) {
+        return prev.map((i) =>
+          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
+
+  const updateQuantity = (id, quantity) => {
+    if (quantity < 1) return;
+    setCart((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+    );
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
+
+  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  /* ------------------ WISHLIST ------------------ */
+  const [wishlist, setWishlist] = useState(() => {
+    const saved = localStorage.getItem("wishlist");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const toggleWishlist = (id) => {
+    setWishlist((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  useEffect(() => {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  /* ------------------ PRODUCTS ------------------ */
+  const [products, setProducts] = useState({});
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const res = await axios.get("http://localhost:5000/api/products"); // Replace with your actual backend URL
+      const data = res.data || [];
+
+      // Group products by category (convert category to slug-like key)
+      const grouped = data.reduce((acc, product) => {
+        const cat = product.category.toLowerCase().replace(/\s+/g, "-");
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push({
+          ...product,
+          price: Number(product.price) || 0,
+          oldPrice: product.old_price ? Number(product.old_price) : null,
+          discount:
+            product.old_price && product.price
+              ? Math.round(
+                  ((Number(product.old_price) - Number(product.price)) /
+                    Number(product.old_price)) *
+                    100
+                )
+              : 0,
+          image: product.image_url || "https://via.placeholder.com/120",
+        });
+        return acc;
+      }, {});
+
+      setProducts(grouped);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  /* ------------------ MINI PRODUCTS (Optional) ------------------ */
+  const [miniProducts, setMiniProducts] = useState([]);
+  useEffect(() => {
+    // Example static mini products
+    setMiniProducts([
+      { id: 1, name: "Gold Ring", category: "one-gram-gold", image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d" },
+      { id: 2, name: "Gold Chain", category: "one-gram-gold", image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca7" },
+      { id: 3, name: "Panchalohalu Pendant", category: "panchalohalu", image: "https://images.unsplash.com/photo-1623072412800-2d84ec529b57" },
+    ]);
+  }, []);
+
+  /* ------------------ BANNERS ------------------ */
+  const [banners, setBanners] = useState([]);
+  const fetchBanners = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/banners");
+      if (res.data) setBanners(res.data);
+    } catch (err) {
+      console.error("Failed to fetch banners:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBanners();
+  }, []);
+
+  /* ------------------ CONTEXT ------------------ */
+  return (
+    <AppContext.Provider
+      value={{
+        /* UI */
+        isMenuOpen,
+        setIsMenuOpen,
+
+        /* User */
+        user,
+        setUser,
+
+        /* Guest */
+        guest,
+        updateGuest,
+
+        /* Cart */
+        cart,
+        cartCount,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+
+        /* Wishlist */
+        wishlist,
+        toggleWishlist,
+
+        /* Products */
+        products,
+        miniProducts,
+        loadingProducts,
+
+        /* Banners */
+        banners,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export default AppProvider;
