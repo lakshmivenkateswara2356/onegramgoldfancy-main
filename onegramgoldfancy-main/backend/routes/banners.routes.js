@@ -1,15 +1,22 @@
-// backend/routes/banner.routes.js
 const express = require("express");
 const router = express.Router();
-
+const upload = require("../middleware/upload");
 const BannerController = require("../controllers/banner.controller");
 
 router.get("/", BannerController.getBanners);
 
-// ✅ Cloudinary upload happens HERE
-router.post("/", upload.single("image"), BannerController.addBanner);
+router.post(
+  "/",
+  upload.single("image"), // ✅ REQUIRED
+  BannerController.addBanner
+);
 
-router.put("/:id", BannerController.updateBanner);
+router.put(
+  "/:id",
+  upload.single("image"),
+  BannerController.updateBanner
+);
+
 router.delete("/:id", BannerController.deleteBanner);
 
 module.exports = router;

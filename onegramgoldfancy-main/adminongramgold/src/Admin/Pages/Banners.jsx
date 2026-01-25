@@ -33,11 +33,11 @@ const Banners = () => {
   /* ================= FORM ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
-    setForm((p) => ({ ...p, imageFile: e.target.files[0] }));
+    setForm((prev) => ({ ...prev, imageFile: e.target.files[0] }));
   };
 
   /* ================= ADD ================= */
@@ -53,18 +53,15 @@ const Banners = () => {
     formData.append("title", form.title);
     formData.append("paragraph", form.paragraph);
     formData.append("button_text", form.buttonText);
-    formData.append("image", form.imageFile);
+    formData.append("image", form.imageFile); // MUST be "image"
 
     try {
       setLoading(true);
 
       await axios.post(API_URL, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Reset form
       setForm({
         title: "",
         paragraph: "",
@@ -83,16 +80,19 @@ const Banners = () => {
     }
   };
 
-  /* ================= ACTIONS ================= */
-  const toggleStatus = async (id) => {
+  /* ================= TOGGLE STATUS ================= */
+  const toggleStatus = async (banner) => {
     try {
-      await axios.put(`${API_URL}/${id}`);
+      await axios.put(`${API_URL}/${banner.id}`, {
+        active: !banner.active,
+      });
       fetchBanners();
     } catch (err) {
       console.error("Toggle status error:", err);
     }
   };
 
+  /* ================= DELETE ================= */
   const deleteBanner = async (id) => {
     if (!window.confirm("Delete this banner?")) return;
 
@@ -165,7 +165,7 @@ const Banners = () => {
       {/* ============ TABLE ============ */}
       <div className="bg-white rounded-xl border overflow-hidden">
         <table className="w-full table-auto">
-          <thead className="bg-gray-50 text-sm text-gray-700">
+          <thead className="bg-gray-50 text-sm">
             <tr>
               <th className="px-4 py-3 text-left">Banner</th>
               <th className="px-4 py-3">Button</th>
@@ -176,16 +176,16 @@ const Banners = () => {
 
           <tbody className="text-sm">
             {banners.map((banner) => (
-              <tr key={banner.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-3 flex items-center gap-4">
+              <tr key={banner.id} className="border-t">
+                <td className="px-4 py-3 flex gap-4">
                   <img
-                    src={banner.image} // ✅ CLOUDINARY URL
+                    src={banner.image}
                     alt={banner.title}
                     className="w-24 h-14 rounded-lg object-cover border"
                   />
                   <div>
                     <p className="font-medium">{banner.title}</p>
-                    <p className="text-xs text-gray-500 line-clamp-1">
+                    <p className="text-xs text-gray-500">
                       {banner.paragraph}
                     </p>
                   </div>
@@ -198,22 +198,17 @@ const Banners = () => {
                 </td>
 
                 <td className="px-4 py-3">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={banner.active === true}
-                      onChange={() => toggleStatus(banner.id)}
-                    />
-                    <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 transition"></div>
-                    <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5"></span>
-                  </label>
+                  <input
+                    type="checkbox"
+                    checked={banner.active}
+                    onChange={() => toggleStatus(banner)}
+                  />
                 </td>
 
-                <td className="px-4 py-3 flex justify-center">
+                <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => deleteBanner(banner.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500"
                   >
                     <Trash2 size={18} />
                   </button>
