@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Footernavigations from "../../Footernavigations";
 
 const Account = () => {
   const navigate = useNavigate();
@@ -77,6 +78,7 @@ const Account = () => {
           </button>
         )}
       </div>
+      <Footernavigations/>
     </div>
   );
 };

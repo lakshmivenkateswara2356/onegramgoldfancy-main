@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export const AppContext = createContext(null);
 
@@ -38,17 +39,23 @@ const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i.id === product.id);
-      if (exists) {
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
+ const addToCart = (product) => {
+  setCart((prev) => {
+    const exists = prev.find((i) => i.id === product.id);
+
+    if (exists) {
+      toast.success("Quantity updated in cart 🛒");
+      return prev.map((i) =>
+        i.id === product.id
+          ? { ...i, quantity: i.quantity + 1 }
+          : i
+      );
+    }
+
+    toast.success("Item added to cart 🛒");
+    return [...prev, { ...product, quantity: 1 }];
+  });
+};
 
   const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
 
@@ -155,6 +162,19 @@ const AppProvider = ({ children }) => {
     fetchBanners();
   }, []);
 
+
+  const buyNow = (product, navigate) => {
+    setCart((prev) => {
+      const exists = prev.find((i) => i.id === product.id);
+      if (exists) return prev;
+      return [...prev, { ...product, quantity: 1 }];
+    });
+
+    toast.success("Proceeding to checkout 💳");
+    navigate("/cart");
+  };
+
+
   /* ------------------ CONTEXT ------------------ */
   return (
     <AppContext.Provider
@@ -178,6 +198,7 @@ const AppProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
+        buyNow,
 
         /* Wishlist */
         wishlist,

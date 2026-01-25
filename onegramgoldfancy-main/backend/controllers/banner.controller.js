@@ -1,13 +1,13 @@
-const Banner = require("../models/Banner");
-const cloudinary = require("../config/cloudinary");
+// backend/controllers/banner.controller.js
+const pool = require("../config/db");
 
-// GET all banners
+// GET banners
 exports.getBanners = async (req, res) => {
   try {
-    const banners = await Banner.findAll({
-      order: [["createdAt", "DESC"]],
-    });
-    res.json(banners);
+    const result = await pool.query(
+      "SELECT * FROM banners ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -18,43 +18,46 @@ exports.addBanner = async (req, res) => {
   try {
     const { title, paragraph, button_text } = req.body;
 
-    if (!title || !paragraph || !button_text || !req.files?.image) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
     }
 
-    // 🔥 Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(
-      req.files.image.tempFilePath,
-      {
-        folder: "banners",
-      }
+    // ✅ Cloudinary URL
+    const image = req.file.path;
+
+    const result = await pool.query(
+      `INSERT INTO banners (title, paragraph, button_text, image, status)
+       VALUES ($1,$2,$3,$4,'Active')
+       RETURNING *`,
+      [title, paragraph, button_text, image]
     );
 
-    const banner = await Banner.create({
-      title,
-      paragraph,
-      button_text,
-      image: uploadResult.secure_url, // ✅ Cloudinary URL
-      active: true,
-    });
-
-    res.status(201).json(banner);
+    res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("UPLOAD ERROR:", err);
+    console.error("Banner upload error:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// TOGGLE banner status
+// TOGGLE status
 exports.updateBanner = async (req, res) => {
   try {
-    const banner = await Banner.findByPk(req.params.id);
-    if (!banner) return res.status(404).json({ message: "Not found" });
+    const { id } = req.params;
 
-    banner.active = !banner.active;
-    await banner.save();
+    const banner = await pool.query(
+      "SELECT status FROM banners WHERE id=$1",
+      [id]
+    );
 
-    res.json(banner);
+    const newStatus =
+      banner.rows[0].status === "Active" ? "Inactive" : "Active";
+
+    const result = await pool.query(
+      "UPDATE banners SET status=$1 WHERE id=$2 RETURNING *",
+      [newStatus, id]
+    );
+
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -63,11 +66,9 @@ exports.updateBanner = async (req, res) => {
 // DELETE banner
 exports.deleteBanner = async (req, res) => {
   try {
-    const banner = await Banner.findByPk(req.params.id);
-    if (!banner) return res.status(404).json({ message: "Not found" });
-
-    await banner.destroy();
-    res.json({ message: "Banner deleted successfully" });
+    const { id } = req.params;
+    await pool.query("DELETE FROM banners WHERE id=$1", [id]);
+    res.json({ message: "Banner deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

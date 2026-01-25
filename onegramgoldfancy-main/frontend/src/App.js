@@ -18,6 +18,7 @@ import OrderSuccess from "./Pages/OrderSuccess"; // ✅ ADD THIS
 
 // ---------- UTILS ----------
 import ProtectedRoute from "./Components/ProtectedRoute";
+import ProductDetails from "./Pages/ProductDetails";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
       {/* ================= PUBLIC ================= */}
       <Route path="/" element={<Home />} />
       <Route path="/category/panchalohalu" element={<Panchalohalu />} />
+      <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/category/one-gram-gold" element={<Onegramgold />} />
 
       {/* ================= AUTH ================= */}

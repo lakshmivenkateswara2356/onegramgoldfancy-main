@@ -4,6 +4,7 @@ import Category from "../Pages/CategoryChips";
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Footernavigations from "../Footernavigations";
 
 const OneGramGold = () => {
   const context = useContext(AppContext); // Always at the top
@@ -130,6 +131,7 @@ const OneGramGold = () => {
           ✨ Authentic One Gram Gold · Premium Finish
         </div>
       </div>
+      <Footernavigations/>
     </div>
   );
 };

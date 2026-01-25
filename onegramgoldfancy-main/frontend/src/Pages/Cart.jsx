@@ -4,6 +4,7 @@ import Navbar from "../Components/Navbar";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Footernavigations from "../Footernavigations";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } =
@@ -51,6 +52,7 @@ const Cart = () => {
       alert("Your cart is empty");
       return;
     }
+    
 
     setLoading(true);
 
@@ -229,6 +231,7 @@ const Cart = () => {
           </button>
         </div>
       </div>
+      <Footernavigations/>
     </div>
   );
 };

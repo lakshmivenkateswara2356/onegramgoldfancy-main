@@ -3,6 +3,7 @@ import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Footernavigations from "../Footernavigations";
 
 
 const Favorites = () => {
@@ -99,6 +100,7 @@ const Favorites = () => {
           </div>
         )}
       </div>
+      <Footernavigations/>
     </div>
   );
 };
