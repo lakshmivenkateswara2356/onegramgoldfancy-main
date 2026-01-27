@@ -2,8 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+
+// ✅ Import DB connection
 const pool = require("./config/db");
 
+// Routes
 const authRoutes = require("./routes/auth.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
@@ -14,29 +17,18 @@ const bannerRoutes = require("./routes/banners.routes");
 const app = express();
 
 // -------------------- CORS --------------------
-const allowedOrigins = [
-  "https://onegramgoldfancy-main.vercel.app",
-  "https://onegramgoldfancy-main-6x68.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:3001"
-];
-
-// ⚡ Apply CORS middleware to ALL routes, INCLUDING preflight
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman / server-to-server
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error("Not allowed by CORS"), false);
-    }
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false
-}));
-
-// ⚡ Handle preflight requests for all routes
-app.options("*", cors());
+app.use(
+  cors({
+    origin: [
+    "https://onegramgoldfancy-main.vercel.app",
+    "http://onegramgoldfancy-main-6x68.vercel.app",
+   
+  ], // replace with frontend URL in production
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // -------------------- MIDDLEWARE --------------------
 app.use(express.json());
