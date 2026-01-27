@@ -100,7 +100,7 @@ const AppProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoadingProducts(true);
-      const res = await axios.get("http://localhost:5000/api/products"); // Replace with your actual backend URL
+      const res = await axios.get("https://onegramgoldfancy-main.onrender.com/api/products"); // Replace with your actual backend URL
       const data = res.data || [];
 
       // Group products by category (convert category to slug-like key)
@@ -151,7 +151,7 @@ const AppProvider = ({ children }) => {
   const [banners, setBanners] = useState([]);
   const fetchBanners = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/banners");
+      const res = await axios.get("https://onegramgoldfancy-main.onrender.com/api/banners");
       if (res.data) setBanners(res.data);
     } catch (err) {
       console.error("Failed to fetch banners:", err);

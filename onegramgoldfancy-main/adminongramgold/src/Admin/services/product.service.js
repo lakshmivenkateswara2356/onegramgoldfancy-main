@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5000/api/products";
+const API_BASE_URL = "https://onegramgoldfancy-main.onrender.com/api/products";
 
 // GET ALL PRODUCTS
 export const getAllProducts = async () => {

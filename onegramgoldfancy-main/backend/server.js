@@ -19,7 +19,11 @@ const app = express();
 // -------------------- CORS --------------------
 app.use(
   cors({
-    origin: "*", // replace with frontend URL in production
+    origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://onegramgoldfancy-main.onrender.com"
+  ], // replace with frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

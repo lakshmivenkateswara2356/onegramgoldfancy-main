@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api/banners";
+const API_URL = "https://onegramgoldfancy-main.onrender.com/api/banners";
 
 const Banners = () => {
   const [banners, setBanners] = useState([]);

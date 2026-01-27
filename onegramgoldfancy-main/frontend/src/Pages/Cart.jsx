@@ -68,7 +68,7 @@ const Cart = () => {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/orders", orderPayload, {
+      await axios.post("https://onegramgoldfancy-main.onrender.com/api/orders", orderPayload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

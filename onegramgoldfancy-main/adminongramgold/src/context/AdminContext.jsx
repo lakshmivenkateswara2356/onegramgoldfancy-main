@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 const AdminContext = createContext();
 export const useAdmin = () => useContext(AdminContext);
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://onegramgoldfancy-main.onrender.com/api";
 
 /* =====================================================
    PROVIDER

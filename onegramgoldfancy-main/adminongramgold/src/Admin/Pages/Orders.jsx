@@ -16,7 +16,7 @@ const Orders = () => {
       const token = localStorage.getItem("adminToken");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/tracking`, {
+      const res = await fetch(`https://onegramgoldfancy-main.onrender.com/api/orders/${orderId}/tracking`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
