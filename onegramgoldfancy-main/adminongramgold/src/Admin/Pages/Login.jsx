@@ -13,19 +13,18 @@ const AdminLogin = () => {
 
     try {
       const res = await axios.post(
-        "https://onegramgoldfancy-main.onrender.com/api/auth/login", // full backend URL
-        { email, password },
-        { headers: { "Content-Type": "application/json" } } // optional, but safer
+        "https://onegramgoldfancy-main.onrender.com/api/auth/login",
+        { email, password }
       );
 
       // ✅ Save token
       localStorage.setItem("token", res.data.token);
 
-      // ✅ Redirect to admin dashboard
+      // ✅ Redirect
       navigate("/admin/dashboard");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || "Login failed");
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
