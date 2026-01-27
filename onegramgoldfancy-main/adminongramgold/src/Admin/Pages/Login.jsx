@@ -14,7 +14,7 @@ const AdminLogin = () => {
     try {
       const res = await axios.post(
         "https://onegramgoldfancy-main.onrender.com/api/auth/login",
-        { email, password, role: "admin" }
+        { email, password }
       );
 
       // ✅ Save token
@@ -41,26 +41,34 @@ const AdminLogin = () => {
         )}
 
         <div className="mb-4">
-          <label className="block mb-1 font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
+  <label htmlFor="admin-email" className="block mb-1 font-medium">
+    Email
+  </label>
+  <input
+    id="admin-email"
+    name="email"
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    className="w-full border px-3 py-2 rounded"
+    required
+  />
+</div>
 
-        <div className="mb-6">
-          <label className="block mb-1 font-medium">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
+<div className="mb-6">
+  <label htmlFor="admin-password" className="block mb-1 font-medium">
+    Password
+  </label>
+  <input
+    id="admin-password"
+    name="password"
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    className="w-full border px-3 py-2 rounded"
+    required
+  />
+</div>
 
         <button
           type="submit"
