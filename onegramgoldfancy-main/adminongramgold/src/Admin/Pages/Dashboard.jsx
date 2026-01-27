@@ -6,6 +6,7 @@ import AdminLogout from "./AdminLogout";
 const Dashboard = () => {
   const { orders, loadingOrders, fetchOrders, products } = useAdmin();
 
+  
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
