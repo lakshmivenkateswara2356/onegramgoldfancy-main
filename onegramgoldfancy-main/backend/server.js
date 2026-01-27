@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: [
     "https://onegramgoldfancy-main.vercel.app",
-    "http://onegramgoldfancy-main-6x68.vercel.app",
+    "https://onegramgoldfancy-main-6x68.vercel.app",
    
   ], // replace with frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],
