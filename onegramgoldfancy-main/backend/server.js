@@ -20,13 +20,14 @@ const app = express();
 app.use(
   cors({
     origin: [
-    "https://onegramgoldfancy-main.vercel.app",
-    "http://onegramgoldfancy-main-6x68.vercel.app",
-   
-  ], // replace with frontend URL in production
-    methods: ["GET", "POST", "PUT", "DELETE"],
+      "https://onegramgoldfancy-main.vercel.app",
+      "https://onegramgoldfancy-main-6x68.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: false
   })
 );
 
