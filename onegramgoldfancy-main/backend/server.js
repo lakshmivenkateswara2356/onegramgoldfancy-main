@@ -2,11 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-
-// ✅ Import DB connection
 const pool = require("./config/db");
 
-// Routes
 const authRoutes = require("./routes/auth.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
@@ -24,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:3001"
 ];
 
+// ⚡ Apply CORS middleware to ALL routes, INCLUDING preflight
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true); // allow Postman / server-to-server
@@ -37,7 +35,7 @@ app.use(cors({
   credentials: false
 }));
 
-// Handle preflight requests
+// ⚡ Handle preflight requests for all routes
 app.options("*", cors());
 
 // -------------------- MIDDLEWARE --------------------
