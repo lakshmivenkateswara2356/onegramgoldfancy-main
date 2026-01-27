@@ -1,6 +1,4 @@
-import react from 'react';
 import Banner from '../Pages/banner';
-import CategoryChips from '../Pages/CategoryChips';
 import FeaturedProducts from '../Pages/FeaturedProducts';
 import Quicku from '../Pages/QuickAccessCards';
 import ProductCard from '../Pages/ProductCard';

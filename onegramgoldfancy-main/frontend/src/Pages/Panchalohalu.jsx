@@ -1,13 +1,12 @@
-import React, { useContext } from "react";
+import  { useContext } from "react";
 import Navbar from "../Components/Navbar";
-import Category from "../Pages/CategoryChips";
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Footernavigations from "../Footernavigations";
 
 const Panchalohalu = () => {
-  const { products, addToCart, wishlist, toggleWishlist } =
+  const { products, wishlist, toggleWishlist } =
     useContext(AppContext);
   const navigate = useNavigate();
 
