@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/orders";
+const BASE_URL = "https://onegramgoldfancy-main.onrender.com/api/orders";
 
 export const createOrder = async (orderData) => {
   const res = await axios.post(BASE_URL, orderData);
