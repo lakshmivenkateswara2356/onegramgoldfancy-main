@@ -20,9 +20,9 @@ const app = express();
 app.use(
   cors({
     origin: [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://onegramgoldfancy-main.onrender.com"
+    "https://onegramgoldfancy-main.vercel.app",
+    "http://onegramgoldfancy-main-6x68.vercel.app",
+   
   ], // replace with frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
