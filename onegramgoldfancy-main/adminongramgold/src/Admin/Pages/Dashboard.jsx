@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useAdmin } from "../../context/AdminContext";
-import useLogout from "../Pages/useLogout";
-import AdminLayout from "../AdminLayout";
+
 import AdminLogout from "./AdminLogout";
 
 const Dashboard = () => {
