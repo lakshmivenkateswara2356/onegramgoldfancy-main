@@ -14,7 +14,7 @@ const AdminLogin = () => {
     try {
       const res = await axios.post(
         "https://onegramgoldfancy-main.onrender.com/api/auth/login",
-        { email, password }
+        { email, password, role: "admin" }
       );
 
       // ✅ Save token
