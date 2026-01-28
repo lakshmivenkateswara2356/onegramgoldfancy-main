@@ -30,6 +30,23 @@ export default function ProductDetails() {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 py-10">
+         <div className="max-w-md mx-auto mb-4 flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-yellow-400 hover:text-yellow-500 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm font-medium ml-1">Back</span>
+          </button>
+        </div>
         <p className="text-xs text-gray-500 mb-6">
           Home / Products /
           <span className="text-[#D4AF37] font-medium"> {product.name}</span>
