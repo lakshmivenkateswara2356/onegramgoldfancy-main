@@ -97,14 +97,14 @@ export default function ProductDetails() {
             <div className="flex gap-4 mt-10">
               <button
                 onClick={() => addToCart(product)}
-                className="w-full py-3 rounded-full border border-[#D4AF37] text-[#D4AF37] font-medium hover:bg-[#FFF1C1] transition"
+                className="w-full py-3 rounded-xsm border border-[#D4AF37] text-[#D4AF37] font-medium hover:bg-[#FFF1C1] transition"
               >
                 Add to Cart
               </button>
 
               <button
                 onClick={() => buyNow(product, navigate)}
-                className="w-full py-3 rounded-full bg-[#D4AF37] text-white font-medium hover:bg-[#C9A227] transition"
+                className="w-full py-3 rounded-xsm bg-[#D4AF37] text-white font-medium hover:bg-[#C9A227] transition"
               >
                 Buy Now
               </button>
