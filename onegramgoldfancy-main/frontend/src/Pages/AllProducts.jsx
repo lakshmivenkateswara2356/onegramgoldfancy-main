@@ -5,10 +5,12 @@ import ProductCard from "../Pages/ProductCard";
 import { Search } from "lucide-react";
 import Footernavigations from "../Footernavigations";
 import ProductGridSkeleton from "../Pages/ProductGridSkeleton";
+import { useNavigate } from "react-router-dom";
 
 const AllProducts = () => {
   const { products, loadingProducts } = useContext(AppContext);
   const [search, setSearch] = useState("");
+   const navigate = useNavigate();
 
   const allProducts = useMemo(() => {
     return Object.values(products || {}).flat();
@@ -28,6 +30,23 @@ const AllProducts = () => {
       <Navbar />
 
       <div className="pt-[75px] px-4 max-w-7xl mx-auto">
+         <div className="max-w-md mx-auto mb-4 flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-yellow-400 hover:text-yellow-500 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm font-medium ml-1">Back</span>
+          </button>
+        </div>
         
         {/* HEADER */}
         <div className="mb-6">
