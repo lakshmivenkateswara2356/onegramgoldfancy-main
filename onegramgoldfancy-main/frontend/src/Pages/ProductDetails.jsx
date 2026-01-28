@@ -176,7 +176,7 @@ export default function ProductDetails() {
           <img
             src={images[activeIndex]}
             alt=""
-            className="max-h-[90vh] max-w-[90vw] rounded-xl"
+            className="h-[90vh] w-[90vw] rounded-xl"
           />
 
           <button
