@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import Navbar from "../Components/Navbar";
-import Category from "../Pages/CategoryChips";
+
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
