@@ -52,9 +52,9 @@ export default function ProductDetails() {
         {/* BACK */}
         <button
           onClick={() => navigate(-1)}
-          className="text-sm text-gray-500 hover:text-gray-800 mb-6"
+          className="text-sm text-gray-500 text-yellow-400 hover:text-gray-800 mb-6 pt-[32px]"
         >
-          ← Back to products
+          ← Back
         </button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
