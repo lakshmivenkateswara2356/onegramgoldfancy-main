@@ -30,16 +30,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
         {/* Mobile Menu */}
-        <button
-          className="md:hidden text-yellow-400"
-          onClick={() => setMenuOpen(true)}
-        >
-          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
+        
 
         {/* Logo */}
         <div
@@ -62,18 +53,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
 
           {/* Account */}
-          <button
-            onClick={() => goTo("/account")}
-            className="text-yellow-400 hover:scale-110 transition"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804
-                M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </button>
-
+         
           {/* Cart */}
           <button
             onClick={() => goTo("/cart")}

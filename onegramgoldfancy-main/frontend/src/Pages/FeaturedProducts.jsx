@@ -1,5 +1,8 @@
 import React from "react";
 import ProductCard from "./ProductCard";
+import smallcrdone from "../Assets/featureimageas.webp";
+import smallcrdtwo from "../Assets/featuretwo.jpg";
+import smallcrdtre from "../Assets/featursthree.jpg";
 
 const dummyProducts = [
   {
@@ -7,28 +10,28 @@ const dummyProducts = [
     name: "One Gram Gold Ring",
     price: "1,299",
     image:
-      "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
+      smallcrdone,
   },
   {
     id: 2,
     name: "Traditional Gold Chain",
     price: "2,499",
     image:
-      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca7",
+      smallcrdtwo,
   },
   {
     id: 3,
     name: "Designer Bangles",
     price: "3,199",
     image:
-      "https://images.unsplash.com/photo-1589987607627-616cac6cbb9c",
+      smallcrdtre,
   },
   {
     id: 4,
     name: "Bridal Necklace Set",
     price: "5,499",
     image:
-      "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d",
+      smallcrdtre,
   },
 ];
 

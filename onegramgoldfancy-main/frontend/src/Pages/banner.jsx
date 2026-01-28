@@ -2,13 +2,13 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
 
 const BannerCarousel = () => {
-  const { banners } = useContext(AppContext);
+  const { banners, loadingBanners } = useContext(AppContext);
   const [current, setCurrent] = useState(0);
   const startX = useRef(0);
 
   /* ================= AUTO SLIDE ================= */
   useEffect(() => {
-    if (banners.length === 0) return;
+    if (!banners || banners.length === 0) return;
 
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % banners.length);
@@ -24,6 +24,7 @@ const BannerCarousel = () => {
 
   const handleTouchEnd = (e) => {
     const endX = e.changedTouches[0].clientX;
+
     if (startX.current - endX > 50) {
       setCurrent((prev) => (prev + 1) % banners.length);
     } else if (endX - startX.current > 50) {
@@ -31,13 +32,16 @@ const BannerCarousel = () => {
     }
   };
 
-  if (banners.length === 0) {
+  /* ================= SKELETON ================= */
+  if (loadingBanners && banners.length === 0) {
     return (
-      <div className="pt-14 text-center text-gray-500">
-        Loading banners...
+      <div className="mt-14 px-4 pt-4">
+        <div className="w-full h-[22vh] sm:h-[26vh] md:h-[70vh] rounded-xl bg-gray-300 animate-pulse" />
       </div>
     );
   }
+
+  if (!banners || banners.length === 0) return null;
 
   return (
     <div className="relative w-full mt-14 px-4 pt-4">
@@ -89,7 +93,9 @@ const BannerCarousel = () => {
               key={index}
               onClick={() => setCurrent(index)}
               className={`h-1.5 w-1.5 rounded-full transition ${
-                current === index ? "bg-yellow-400 scale-125" : "bg-white/50"
+                current === index
+                  ? "bg-yellow-400 scale-125"
+                  : "bg-white/50"
               }`}
             />
           ))}

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Onegramgold from "../Assets/ss.jpg";
+import Panchalohalu from "../Assets/firstminifirstcard.jpg";
 
 const QuickAccessCards = () => {
   return (
@@ -17,7 +18,7 @@ const QuickAccessCards = () => {
           "
         >
           <img
-            src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d"
+            src={Panchalohalu}
             alt="Panchalohalu"
             className="w-full h-full object-cover"
           />

@@ -1,6 +1,9 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import goldring from "../Assets/rings.webp";
+import chain from "../Assets/goldchains.jpg";
+import pendent from "../Assets/pendent.jpg";
 
 export const AppContext = createContext(null);
 
@@ -39,25 +42,26 @@ const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
- const addToCart = (product) => {
-  setCart((prev) => {
-    const exists = prev.find((i) => i.id === product.id);
+  const addToCart = (product) => {
+    setCart((prev) => {
+      const exists = prev.find((i) => i.id === product.id);
 
-    if (exists) {
-      toast.success("Quantity updated in cart 🛒");
-      return prev.map((i) =>
-        i.id === product.id
-          ? { ...i, quantity: i.quantity + 1 }
-          : i
-      );
-    }
+      if (exists) {
+        toast.success("Quantity updated in cart 🛒");
+        return prev.map((i) =>
+          i.id === product.id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
+        );
+      }
 
-    toast.success("Item added to cart 🛒");
-    return [...prev, { ...product, quantity: 1 }];
-  });
-};
+      toast.success("Item added to cart 🛒");
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
 
-  const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
+  const removeFromCart = (id) =>
+    setCart((prev) => prev.filter((i) => i.id !== id));
 
   const updateQuantity = (id, quantity) => {
     if (quantity < 1) return;
@@ -100,10 +104,12 @@ const AppProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoadingProducts(true);
-      const res = await axios.get("https://onegramgoldfancy-main.onrender.com/api/products"); // Replace with your actual backend URL
+      const res = await axios.get(
+        "https://onegramgoldfancy-main.onrender.com/api/products"
+      );
+
       const data = res.data || [];
 
-      // Group products by category (convert category to slug-like key)
       const grouped = data.reduce((acc, product) => {
         const cat = product.category.toLowerCase().replace(/\s+/g, "-");
         if (!acc[cat]) acc[cat] = [];
@@ -136,25 +142,58 @@ const AppProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  /* ------------------ MINI PRODUCTS (Optional) ------------------ */
+  /* ------------------ MINI PRODUCTS ------------------ */
   const [miniProducts, setMiniProducts] = useState([]);
+
   useEffect(() => {
-    // Example static mini products
     setMiniProducts([
-      { id: 1, name: "Gold Ring", category: "one-gram-gold", image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d" },
-      { id: 2, name: "Gold Chain", category: "one-gram-gold", image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca7" },
-      { id: 3, name: "Panchalohalu Pendant", category: "panchalohalu", image: "https://images.unsplash.com/photo-1623072412800-2d84ec529b57" },
+      {
+        id: 1,
+        name: "Gold Ring",
+        category: "one-gram-gold",
+        image:
+         goldring,
+      },
+      {
+        id: 2,
+        name: "Gold Chain",
+        category: "one-gram-gold",
+        image:
+          chain,
+      },
+      {
+        id: 3,
+        name: "Panchalohalu Pendant",
+        category: "panchalohalu",
+        image:
+          pendent,
+      },
     ]);
   }, []);
 
-  /* ------------------ BANNERS ------------------ */
-  const [banners, setBanners] = useState([]);
+  /* ------------------ BANNERS (FIXED) ------------------ */
+  const [banners, setBanners] = useState(() => {
+    const cached = localStorage.getItem("cachedBanners");
+    return cached ? JSON.parse(cached) : [];
+  });
+
+  const [loadingBanners, setLoadingBanners] = useState(true);
+
   const fetchBanners = async () => {
     try {
-      const res = await axios.get("https://onegramgoldfancy-main.onrender.com/api/banners");
-      if (res.data) setBanners(res.data);
+      const res = await axios.get(
+        "https://onegramgoldfancy-main.onrender.com/api/banners"
+      );
+
+      if (res.data && res.data.length > 0) {
+        setBanners(res.data);
+        localStorage.setItem("cachedBanners", JSON.stringify(res.data));
+      }
     } catch (err) {
-      console.error("Failed to fetch banners:", err);
+      console.warn("Backend sleeping, using cached banners");
+      // IMPORTANT: do NOT clear banners
+    } finally {
+      setLoadingBanners(false);
     }
   };
 
@@ -162,7 +201,7 @@ const AppProvider = ({ children }) => {
     fetchBanners();
   }, []);
 
-
+  /* ------------------ BUY NOW ------------------ */
   const buyNow = (product, navigate) => {
     setCart((prev) => {
       const exists = prev.find((i) => i.id === product.id);
@@ -173,7 +212,6 @@ const AppProvider = ({ children }) => {
     toast.success("Proceeding to checkout 💳");
     navigate("/cart");
   };
-
 
   /* ------------------ CONTEXT ------------------ */
   return (
@@ -211,6 +249,7 @@ const AppProvider = ({ children }) => {
 
         /* Banners */
         banners,
+        loadingBanners,
       }}
     >
       {children}
