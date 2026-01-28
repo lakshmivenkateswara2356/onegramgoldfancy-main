@@ -2,25 +2,24 @@ import { useContext, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
-import Footernavigation from "../Footernavigations";
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, addToCart, buyNow } = useContext(AppContext);
 
-  const product = products?.panchalohalu?.find(
-    (p) => p.id.toString() === id
-  );
+  /* 🔥 FIND PRODUCT FROM ALL CATEGORIES */
+  const product = Object.values(products || {})
+    .flat()
+    .find((p) => p.id.toString() === id);
 
-  /* ✅ HOOKS MUST BE ABOVE CONDITIONAL RETURN */
-  const safeImages = product?.images || [product?.image || ""];
-  const [thumbnail, setThumbnail] = useState(safeImages[0]);
+  /* ✅ HOOKS MUST BE ABOVE RETURN */
+  const images = product?.images || [product?.image || ""];
+  const [thumbnail, setThumbnail] = useState(images[0]);
 
-  /* ✅ CONDITIONAL RETURN AFTER HOOKS */
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#FFF9E6] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF9E6]">
         <p className="text-gray-500">Product not found</p>
       </div>
     );
@@ -32,7 +31,7 @@ export default function ProductDetails() {
 
       <div className="max-w-6xl mx-auto px-4 py-10">
         <p className="text-xs text-gray-500 mb-6">
-          Home / Panchalohalu /
+          Home / Products /
           <span className="text-[#D4AF37] font-medium"> {product.name}</span>
         </p>
 
@@ -40,22 +39,22 @@ export default function ProductDetails() {
           {/* LEFT - Images */}
           <div className="flex gap-4">
             <div className="flex flex-col gap-3">
-              {safeImages.map((img, index) => (
+              {images.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setThumbnail(img)}
-                  className={`border rounded-lg overflow-hidden w-20 h-20 flex items-center justify-center ${
+                  className={`w-20 h-20 border rounded-lg overflow-hidden ${
                     thumbnail === img
                       ? "border-[#D4AF37]"
                       : "border-gray-300"
                   }`}
                 >
-                  <img src={img} alt="" className="object-cover w-full h-full" />
+                  <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
 
-            <div className="border border-gray-300 rounded-xl overflow-hidden bg-white">
+            <div className="bg-white border rounded-xl overflow-hidden">
               <img
                 src={thumbnail}
                 alt={product.name}
@@ -65,32 +64,32 @@ export default function ProductDetails() {
           </div>
 
           {/* RIGHT - Details */}
-          <div className="flex-1 text-sm text-[#2C2C2C]">
-            <h1 className="text-2xl md:text-3xl font-semibold mb-2">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-semibold">
               {product.name}
             </h1>
 
             <div className="mt-4">
               <p className="text-gray-400 line-through text-sm">
-                ₹{product.mrp || product.price + 500}
+                ₹{product.oldPrice || product.price + 500}
               </p>
               <p className="text-3xl font-semibold text-[#D4AF37]">
                 ₹{product.price}
               </p>
-              <span className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500">
                 Inclusive of all taxes
-              </span>
+              </p>
             </div>
 
             <div className="mt-6">
-              <p className="font-medium text-base mb-2">Product Details</p>
+              <p className="font-medium mb-2">Product Details</p>
               <ul className="list-disc ml-5 text-gray-600 space-y-1">
                 {(product.description || [
-                  "Premium quality gold polish",
+                  "Premium gold polish",
                   "Traditional handcrafted design",
-                  "Long-lasting shine & durability",
-                ]).map((desc, i) => (
-                  <li key={i}>{desc}</li>
+                  "Long lasting shine",
+                ]).map((d, i) => (
+                  <li key={i}>{d}</li>
                 ))}
               </ul>
             </div>
@@ -98,24 +97,21 @@ export default function ProductDetails() {
             <div className="flex gap-4 mt-10">
               <button
                 onClick={() => addToCart(product)}
-                className="w-full py-3 rounded-sm border border-[#D4AF37] text-[#D4AF37] font-medium hover:bg-[#FFF1C1] transition"
+                className="w-full py-3 border border-[#D4AF37] text-[#D4AF37] hover:bg-[#FFF1C1] transition"
               >
                 Add to Cart
               </button>
 
               <button
                 onClick={() => buyNow(product, navigate)}
-                className="w-full py-3 rounded-sm bg-[#D4AF37] text-white font-medium hover:bg-[#C9A227] transition"
+                className="w-full py-3 bg-[#D4AF37] text-white hover:bg-[#C9A227] transition"
               >
                 Buy Now
               </button>
             </div>
-
-           
           </div>
         </div>
       </div>
-      <Footernavigation/>
     </div>
   );
 }
