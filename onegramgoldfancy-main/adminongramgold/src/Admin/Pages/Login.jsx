@@ -7,74 +7,88 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       const res = await axios.post(
         "https://onegramgoldfancy-main.onrender.com/api/auth/login",
-        { email, password }
+        { email, password },
+        { withCredentials: true }
       );
 
-      // ✅ Save token
-      localStorage.setItem("token", res.data.token);
+      const { token, user } = res.data;
 
-      // ✅ Redirect
+      // ✅ Only admin can login
+      if (user.role !== "admin") {
+        setError("You are not authorized as admin");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Save token & user
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       navigate("/admin/dashboard");
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 px-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm"
+        className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 md:p-10 animate-[fadeIn_0.6s_ease-out]"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
+          Admin Login
+        </h2>
 
         {error && (
-          <p className="text-red-500 mb-4 text-center">{error}</p>
+          <p className="text-red-500 mb-4 text-center font-medium">{error}</p>
         )}
 
-        <div className="mb-4">
-  <label htmlFor="admin-email" className="block mb-1 font-medium">
-    Email
-  </label>
-  <input
-    id="admin-email"
-    name="email"
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    className="w-full border px-3 py-2 rounded"
-    required
-  />
-</div>
+        <div className="mb-5">
+          <label className="block mb-1 font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@example.com"
+            className="w-full border px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition"
+            required
+          />
+        </div>
 
-<div className="mb-6">
-  <label htmlFor="admin-password" className="block mb-1 font-medium">
-    Password
-  </label>
-  <input
-    id="admin-password"
-    name="password"
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    className="w-full border px-3 py-2 rounded"
-    required
-  />
-</div>
+        <div className="mb-6">
+          <label className="block mb-1 font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            className="w-full border px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition"
+            required
+          />
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={loading}
+          className={`w-full py-3 rounded-xl text-white font-semibold text-lg transition
+            ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-[#C9A227] to-[#D4AF37] hover:opacity-90"}
+          `}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
