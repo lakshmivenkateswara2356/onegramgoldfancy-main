@@ -5,11 +5,9 @@ import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } =
     useContext(AppContext);
-
   const navigate = useNavigate();
 
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -52,7 +50,6 @@ const Cart = () => {
       alert("Your cart is empty");
       return;
     }
-    
 
     setLoading(true);
 
@@ -68,11 +65,15 @@ const Cart = () => {
     };
 
     try {
-      await axios.post("https://onegramgoldfancy-main.onrender.com/api/orders", orderPayload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        "https://onegramgoldfancy-main.onrender.com/api/orders",
+        orderPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       clearCart();
 
@@ -87,126 +88,134 @@ const Cart = () => {
   };
 
   return (
-    <div className="bg-[#fafafa] min-h-screen">
+    <div className="bg-[#FAFAFA] min-h-screen">
       <Navbar />
 
-      <div className="pt-20 px-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-10">
+      <div className="pt-24 px-4 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
+
         {/* ---------------- CART ITEMS ---------------- */}
-        <div className="flex-1">
-          <h1 className="text-3xl font-medium mb-6">
-            Shopping Cart{" "}
-            <span className="text-sm text-indigo-500">
-              {cart.length} Items
+        <div className="lg:col-span-2">
+          <h1 className="text-3xl font-semibold text-gray-900 mb-6">
+            Shopping Cart
+            <span className="ml-2 text-sm text-[#C9A227]">
+              ({cart.length} items)
             </span>
           </h1>
 
           {cart.length === 0 ? (
-            <p className="text-gray-500">Your cart is empty</p>
+            <div className="bg-white rounded-2xl p-10 text-center shadow-sm">
+              <p className="text-gray-500 mb-4">Your cart is currently empty</p>
+              <button
+                onClick={() => navigate("/")}
+                className="text-[#C9A227] font-medium hover:underline"
+              >
+                Continue shopping
+              </button>
+            </div>
           ) : (
-            <>
-              <div className="grid grid-cols-[2fr_1fr_1fr] text-gray-500 font-medium pb-3">
-                <p>Product Details</p>
-                <p className="text-center">Subtotal</p>
-                <p className="text-center">Action</p>
-              </div>
-
+            <div className="space-y-6">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[2fr_1fr_1fr] items-center pt-4"
+                  className="
+                    bg-white rounded-2xl p-5 shadow-sm
+                    flex flex-col sm:flex-row gap-5
+                  "
                 >
-                  <div className="flex gap-4">
-                    <img
-                      src={item.image}
-                      className="w-24 h-24 object-cover border rounded"
-                      alt={item.name}
-                    />
-                    <div>
-                      <p className="font-semibold">{item.name}</p>
-                      <div className="text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          Qty:
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              updateQuantity(
-                                item.id,
-                                Math.max(1, +e.target.value)
-                              )
-                            }
-                            className="w-14 border px-1"
-                          />
-                        </div>
-                      </div>
+                  {/* IMAGE */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-28 h-28 rounded-xl object-cover border"
+                  />
+
+                  {/* DETAILS */}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{item.name}</h3>
+
+                    {/* QUANTITY */}
+                    <div className="flex items-center gap-2 mt-3 text-sm">
+                      <span className="text-gray-500">Quantity</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateQuantity(item.id, Math.max(1, +e.target.value))
+                        }
+                        className="
+                          w-16 px-2 py-1 rounded-lg border
+                          focus:ring-1 focus:ring-[#C9A227]
+                          outline-none
+                        "
+                      />
                     </div>
+
+                    {/* PRICE */}
+                    <p className="mt-4 font-semibold text-gray-800">
+                      ₹{item.price * item.quantity}
+                    </p>
                   </div>
 
-                  <p className="text-center font-medium">
-                    ₹{item.price * item.quantity}
-                  </p>
-
+                  {/* REMOVE */}
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="mx-auto text-red-500"
+                    className="text-red-500 hover:bg-red-50 p-2 rounded-lg self-start"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
 
         {/* ---------------- ORDER SUMMARY ---------------- */}
-        <div className="max-w-[360px] w-full bg-gray-100/40 p-5 border">
-          <h2 className="text-xl font-medium">Order Summary</h2>
+        <div className="bg-white rounded-2xl shadow-sm p-6 h-fit">
+          <h2 className="text-xl font-semibold text-gray-900">Order Summary</h2>
+
           <hr className="my-4" />
 
-          <p className="text-sm font-medium uppercase">Delivery Address</p>
+          {/* ADDRESS */}
+          <p className="text-sm font-medium text-gray-700 mb-2">Delivery Address</p>
 
           {!guest.address || isEditingAddress ? (
-            <div className="space-y-2 mt-2">
+            <div className="space-y-3">
               <input
-                placeholder="Name"
+                placeholder="Full Name"
                 value={guest.name}
-                onChange={(e) =>
-                  setGuest({ ...guest, name: e.target.value })
-                }
-                className="w-full border px-3 py-2"
+                onChange={(e) => setGuest({ ...guest, name: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-[#C9A227]"
               />
               <input
                 placeholder="WhatsApp Number"
                 value={guest.phone}
-                onChange={(e) =>
-                  setGuest({ ...guest, phone: e.target.value })
-                }
-                className="w-full border px-3 py-2"
+                onChange={(e) => setGuest({ ...guest, phone: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-[#C9A227]"
               />
               <textarea
-                placeholder="Full Address"
+                placeholder="Complete Address"
                 value={guest.address}
                 onChange={(e) =>
                   setGuest({ ...guest, address: e.target.value })
                 }
-                className="w-full border px-3 py-2"
+                className="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-[#C9A227]"
               />
               {guest.address && (
                 <button
                   onClick={() => setIsEditingAddress(false)}
-                  className="text-indigo-500 text-sm"
+                  className="text-[#C9A227] text-sm font-medium"
                 >
                   Save Address
                 </button>
               )}
             </div>
           ) : (
-            <div className="mt-2">
-              <p className="text-gray-600">{guest.address}</p>
+            <div>
+              <p className="text-gray-600 text-sm">{guest.address}</p>
               <button
                 onClick={() => setIsEditingAddress(true)}
-                className="text-indigo-500 text-sm mt-1"
+                className="text-[#C9A227] text-sm font-medium mt-1"
               >
                 Change
               </button>
@@ -215,23 +224,29 @@ const Cart = () => {
 
           <hr className="my-4" />
 
-          <p className="flex justify-between text-gray-700">
-            <span>Total</span>
-            <span className="font-semibold">₹{subtotal}</span>
-          </p>
+          {/* TOTAL */}
+          <div className="flex justify-between text-gray-800 font-medium">
+            <span>Total Amount</span>
+            <span className="text-lg">₹{subtotal}</span>
+          </div>
 
+          {/* PLACE ORDER */}
           <button
             onClick={confirmOrder}
             disabled={loading}
-            className={`w-full py-3 mt-6 text-white transition
-              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-500 hover:bg-indigo-600"}
+            className={`
+              w-full py-3 mt-6 rounded-xl text-white font-medium transition
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#C9A227] to-[#D4AF37] hover:opacity-90"
+              }
             `}
           >
             {loading ? "Placing Order..." : "Place Order"}
           </button>
         </div>
       </div>
-      
     </div>
   );
 };
