@@ -38,16 +38,16 @@ const App = () => {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="products" element={<Products />} />
-            <Route path="categories" element={<Categories />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="customers" element={<Customers />} />
-            <Route path="offers" element={<Offers />} />
-            <Route path="inventory" element={<Inventory />} />
-            <Route path="banners" element={<Banners />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/offers" element={<Offers />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/banners" element={<Banners />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>
