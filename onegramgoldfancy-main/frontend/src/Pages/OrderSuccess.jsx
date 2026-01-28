@@ -5,57 +5,87 @@ import { useEffect } from "react";
 const OrderSuccess = () => {
   const navigate = useNavigate();
 
-  // Optional auto-redirect
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate("/");
-    }, 6000);
+    }, 7000);
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-10 text-center
-                      animate-[fadeIn_0.6s_ease-out]">
+    <div className="min-h-screen flex items-center justify-center
+      bg-gradient-to-br from-[#1f2933] via-[#111827] to-black px-4">
 
+      <div
+        className="
+          bg-white/95 backdrop-blur
+          rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]
+          max-w-md w-full p-10 text-center
+          animate-[fadeIn_0.6s_ease-out]
+        "
+      >
         {/* ICON */}
-        <div className="flex justify-center mb-5">
-          <CheckCircle
-            size={88}
-            className="text-green-500 animate-[scaleUp_0.6s_ease-out]"
-          />
+        <div className="flex justify-center mb-6">
+          <div className="
+            w-24 h-24 rounded-full
+            bg-gradient-to-br from-yellow-300 to-yellow-500
+            flex items-center justify-center
+            shadow-lg animate-[scaleUp_0.5s_ease-out]
+          ">
+            <CheckCircle size={56} className="text-white" />
+          </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800">
-          Order Placed Successfully 🎉
+        {/* TITLE */}
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Order Confirmed
         </h1>
 
-        <p className="text-gray-500 mt-2 leading-relaxed">
-          Thank you for your order. We’ve received your request and will start
-          processing it right away.
+        {/* DESCRIPTION */}
+        <p className="text-gray-600 mt-3 leading-relaxed text-sm">
+          Thank you for choosing <span className="font-medium text-gray-800">
+            OneGram Gold Fancy
+          </span>.
+          <br />
+          Your order has been successfully placed and is now being prepared.
         </p>
 
+        {/* INFO CARD */}
+        <div className="mt-6 bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+          You will receive an order confirmation and tracking details
+          shortly via WhatsApp or Email.
+        </div>
+
         {/* ACTIONS */}
-        <div className="mt-7 space-y-3">
+        <div className="mt-8 space-y-3">
           <button
             onClick={() => navigate("/orders")}
-            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold
-                       hover:bg-indigo-700 transition-all duration-200"
+            className="
+              w-full py-3 rounded-xl
+              bg-gradient-to-r from-gray-900 to-gray-700
+              text-white font-medium
+              hover:opacity-90 transition
+            "
           >
             View My Orders
           </button>
 
           <button
             onClick={() => navigate("/")}
-            className="w-full py-3 rounded-xl border border-gray-300 font-medium
-                       hover:bg-gray-100 transition-all duration-200"
+            className="
+              w-full py-3 rounded-xl
+              border border-gray-300
+              font-medium text-gray-700
+              hover:bg-gray-100 transition
+            "
           >
             Continue Shopping
           </button>
         </div>
 
-        <p className="text-xs text-gray-400 mt-5">
-          Redirecting to home shortly…
+        {/* FOOT NOTE */}
+        <p className="text-xs text-gray-400 mt-6">
+          You’ll be redirected to the homepage shortly.
         </p>
       </div>
     </div>
