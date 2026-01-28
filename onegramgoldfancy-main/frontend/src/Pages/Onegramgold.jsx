@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import Navbar from "../Components/Navbar";
 import Category from "../Pages/CategoryChips";
 import { AppContext } from "../context/AppContext";
@@ -7,12 +7,11 @@ import { useNavigate } from "react-router-dom";
 import Footernavigations from "../Footernavigations";
 
 const OneGramGold = () => {
-  const context = useContext(AppContext); // Always at the top
+  const { products, wishlist, toggleWishlist, addToCart, loadingProducts } =
+    useContext(AppContext);
   const navigate = useNavigate();
 
-  const { products, addToCart, wishlist, toggleWishlist, loadingProducts } = context;
-
-  const oneGramGoldProducts = products["one-gram-gold"] || [];
+  const oneGramGoldProducts = products?.["one-gram-gold"] || [];
 
   if (loadingProducts) {
     return (
@@ -23,10 +22,10 @@ const OneGramGold = () => {
   }
 
   return (
-    <div className="bg-gradient-to-b from-[#FAFAFA] to-[#F2F2F2] min-h-screen">
+    <div className="bg-[#FAFAFA] min-h-screen font-poppins">
       <Navbar />
 
-      <div className="pt-[75px] px-4 max-w-7xl mx-auto">
+      <div className="pt-[68px] px-6 max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="max-w-md mx-auto mb-4 flex items-center">
           <button
@@ -40,7 +39,12 @@ const OneGramGold = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             <span className="text-sm font-medium ml-1">Back</span>
           </button>
@@ -50,39 +54,41 @@ const OneGramGold = () => {
         <Category />
 
         {/* Heading */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-semibold text-slate-800">
             One Gram Gold Collection
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Pure gold · Elegant designs
+          <p className="text-slate-600 text-sm mt-1">
+            Pure gold · Elegant craftsmanship
           </p>
         </div>
 
         {/* Grid */}
         {oneGramGoldProducts.length === 0 ? (
-          <p className="text-center text-gray-500">
-            No products available
-          </p>
+          <p className="text-center text-gray-500">No products available</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {oneGramGoldProducts.map((product) => (
               <div
                 key={product.id}
-                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300"
+                className="group bg-white rounded-xl border shadow-sm hover:shadow-lg transition cursor-pointer"
+                onClick={() => navigate(`/product/${product.id}`)}
               >
                 {/* Image */}
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden rounded-t-xl">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="h-36 sm:h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="h-44 w-full object-cover group-hover:scale-105 transition duration-500"
                   />
 
                   {/* Wishlist */}
                   <button
-                    onClick={() => toggleWishlist(product.id)}
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur p-1.5 rounded-full shadow hover:scale-110 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(product.id);
+                    }}
+                    className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full shadow"
                   >
                     <Heart
                       size={16}
@@ -96,28 +102,32 @@ const OneGramGold = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-3 space-y-1.5">
-                  <h2 className="text-xs font-semibold text-gray-900 line-clamp-2">
+                <div className="p-3">
+                  <h2 className="text-sm font-medium text-gray-900 line-clamp-2">
                     {product.name}
                   </h2>
 
-                  <p className="text-sm font-bold text-[#B08A2E]">
+                  <p className="text-lg font-semibold text-[#B08A2E] mt-1">
                     ₹{product.price}
                   </p>
 
                   {/* Buttons */}
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex gap-2 mt-3">
                     <button
-                      onClick={() => addToCart(product)}
-                      className="flex-1 py-1.5 text-[11px] font-semibold rounded-lg border border-[#C9A24D] text-[#C9A24D] hover:bg-[#FAF3E0] transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product);
+                      }}
+                      className="flex-1 py-1.5 text-xs font-semibold rounded-lg border border-[#C9A24D] text-[#C9A24D] hover:bg-[#FAF3E0] transition"
                     >
-                      Cart
+                      Add to Cart
                     </button>
 
                     <button
-                      className="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white hover:opacity-90 transition"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-[#B08A2E] text-white hover:opacity-90 transition"
                     >
-                      Buy
+                      Buy Now
                     </button>
                   </div>
                 </div>
@@ -126,12 +136,12 @@ const OneGramGold = () => {
           </div>
         )}
 
-        {/* Footer */}
         <div className="mt-12 text-center text-xs text-gray-500">
           ✨ Authentic One Gram Gold · Premium Finish
         </div>
       </div>
-      <Footernavigations/>
+
+      <Footernavigations />
     </div>
   );
 };

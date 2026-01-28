@@ -105,7 +105,8 @@ const AppProvider = ({ children }) => {
     try {
       setLoadingProducts(true);
       const res = await axios.get(
-        "https://onegramgoldfancy-main.onrender.com/api/products"
+        "https://onegramgoldfancy-main.onrender.com/api/products",
+        
       );
 
       const data = res.data || [];

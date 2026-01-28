@@ -22,6 +22,7 @@ app.use(
     origin: [
     "https://onegramgoldfancy-main.vercel.app",
     "https://onegramgoldfancy-main-6x68.vercel.app",
+    "http://localhost:3000",
    
   ], // replace with frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],

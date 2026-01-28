@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
+import Footernavigation from "../Footernavigations";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -110,12 +111,11 @@ export default function ProductDetails() {
               </button>
             </div>
 
-            <p className="mt-4 text-xs text-gray-500">
-              ✔ 100% quality checked • ✔ Secure payment • ✔ Easy returns
-            </p>
+           
           </div>
         </div>
       </div>
+      <Footernavigation/>
     </div>
   );
 }
