@@ -45,7 +45,11 @@ const AllProducts = () => {
             placeholder="Search jewellery..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-yellow-400"
+            className="
+              w-full pl-9 pr-3 py-2 text-sm
+              border rounded-lg
+              focus:outline-none focus:ring-1 focus:ring-yellow-400
+            "
           />
         </div>
 
@@ -55,7 +59,7 @@ const AllProducts = () => {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="h-56 bg-gray-100 rounded-xl animate-pulse"
+                className="h-60 bg-gray-100 rounded-xl animate-pulse"
               />
             ))}
           </div>
