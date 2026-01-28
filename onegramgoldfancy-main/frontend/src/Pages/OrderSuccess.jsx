@@ -22,8 +22,7 @@ const OrderSuccess = () => {
           rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]
           max-w-md w-full p-10 text-center
           animate-[fadeIn_0.6s_ease-out]
-        "
-      >
+        ">
         {/* ICON */}
         <div className="flex justify-center mb-6">
           <div className="
