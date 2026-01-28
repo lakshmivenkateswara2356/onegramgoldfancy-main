@@ -30,7 +30,7 @@ export default function ProductDetails() {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 py-10">
-         <div className="max-w-md mx-auto mb-4 flex items-center">
+         <div className="max-w-md mx-auto mb-4 flex items-center pt-[15px]">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center text-yellow-400 hover:text-yellow-500 transition"
