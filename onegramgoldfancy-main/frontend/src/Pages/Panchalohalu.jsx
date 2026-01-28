@@ -3,7 +3,7 @@ import Navbar from "../Components/Navbar";
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Footernavigations from "../Footernavigations";
+
 
 const Panchalohalu = () => {
   const { products, wishlist, toggleWishlist } =
@@ -112,7 +112,7 @@ const Panchalohalu = () => {
           ✨ Authentic Panchalohalu · Premium Finish
         </div>
       </div>
-      <Footernavigations/>
+      
     </div>
   );
 };
