@@ -16,18 +16,6 @@ const Footer = () => {
           </p>
         </div>
 
-        
-        <div>
-          <h3 className="text-sm font-semibold text-white mb-3">
-            Quick Links
-          </h3>
-          <ul className="space-y-2 text-sm">
-            <li>Home</li>
-            <li>One Gram Gold</li>
-            <li>Panchalohalu</li>
-            <li>New Arrivals</li>
-          </ul>
-        </div>
 
        
         <div>

@@ -4,6 +4,7 @@ import Navbar from "../Components/Navbar";
 import ProductCard from "../Pages/ProductCard";
 import { Search } from "lucide-react";
 import Footernavigations from "../Footernavigations";
+import ProductGridSkeleton from "../Pages/ProductGridSkeleton";
 
 const AllProducts = () => {
   const { products, loadingProducts } = useContext(AppContext);
@@ -19,11 +20,15 @@ const AllProducts = () => {
     );
   }, [allProducts, search]);
 
+  const showSkeleton =
+    loadingProducts || allProducts.length === 0;
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       <Navbar />
 
       <div className="pt-[75px] px-4 max-w-7xl mx-auto">
+        
         {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -53,20 +58,17 @@ const AllProducts = () => {
           />
         </div>
 
-        {/* LOADING */}
-        {loadingProducts && (
+        {/* SKELETON LOADING */}
+        {showSkeleton && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="h-60 bg-gray-100 rounded-xl animate-pulse"
-              />
+              <ProductGridSkeleton key={i} />
             ))}
           </div>
         )}
 
         {/* PRODUCTS */}
-        {!loadingProducts && filteredProducts.length > 0 && (
+        {!showSkeleton && filteredProducts.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -74,8 +76,8 @@ const AllProducts = () => {
           </div>
         )}
 
-        {/* EMPTY */}
-        {!loadingProducts && filteredProducts.length === 0 && (
+        {/* EMPTY STATE */}
+        {!showSkeleton && filteredProducts.length === 0 && (
           <p className="text-center text-gray-500 py-10">
             No products found
           </p>
