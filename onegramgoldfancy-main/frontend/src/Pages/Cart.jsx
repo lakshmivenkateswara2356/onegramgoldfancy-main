@@ -5,15 +5,17 @@ import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart, guest } =
+  const { cart, removeFromCart, updateQuantity, clearCart } =
     useContext(AppContext);
 
   const navigate = useNavigate();
 
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [localGuest, setLocalGuest] = useState({
+
+  const [guest, setGuest] = useState({
     name: "",
     phone: "",
     address: "",
@@ -21,15 +23,11 @@ const Cart = () => {
 
   /* ---------------- LOAD SAVED ADDRESS ---------------- */
   useEffect(() => {
-    if (guest.name || guest.phone || guest.address) {
-      setLocalGuest(guest);
-    } else {
-      const saved = localStorage.getItem("deliveryAddress");
-      if (saved) {
-        setLocalGuest(JSON.parse(saved));
-      }
+    const saved = localStorage.getItem("deliveryAddress");
+    if (saved) {
+      setGuest(JSON.parse(saved));
     }
-  }, [guest]);
+  }, []);
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -38,16 +36,14 @@ const Cart = () => {
 
   /* ---------------- CONFIRM ORDER ---------------- */
   const confirmOrder = async () => {
-    // ✅ Get logged-in user token
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    const token = savedUser?.token;
+    const token = localStorage.getItem("token");
 
     if (!token) {
       alert("Please login to place order");
       return;
     }
 
-    if (!localGuest.name || !localGuest.phone || !localGuest.address) {
+    if (!guest.name || !guest.phone || !guest.address) {
       alert("Please fill delivery details");
       return;
     }
@@ -56,36 +52,35 @@ const Cart = () => {
       alert("Your cart is empty");
       return;
     }
+    
 
     setLoading(true);
 
-    // Save address permanently
-    localStorage.setItem("deliveryAddress", JSON.stringify(localGuest));
+    // ✅ Save address permanently
+    localStorage.setItem("deliveryAddress", JSON.stringify(guest));
 
     const orderPayload = {
       grams: cart.reduce((sum, item) => sum + item.quantity, 0),
       total_amount: subtotal,
-      customer_name: localGuest.name,
-      phone: localGuest.phone,
-      address: localGuest.address,
+      customer_name: guest.name,
+      phone: guest.phone,
+      address: guest.address,
     };
 
     try {
-      await axios.post(
-        "https://onegramgoldfancy-main.onrender.com/api/orders",
-        orderPayload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.post("https://onegramgoldfancy-main.onrender.com/api/orders", orderPayload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       clearCart();
+
+      // ✅ PREMIUM FLOW
       navigate("/order-success");
     } catch (err) {
       console.error(err);
-      alert("Order failed: " + (err.response?.data?.message || ""));
+      alert("Order failed");
     } finally {
       setLoading(false);
     }
@@ -100,7 +95,9 @@ const Cart = () => {
         <div className="flex-1">
           <h1 className="text-3xl font-medium mb-6">
             Shopping Cart{" "}
-            <span className="text-sm text-indigo-500">{cart.length} Items</span>
+            <span className="text-sm text-indigo-500">
+              {cart.length} Items
+            </span>
           </h1>
 
           {cart.length === 0 ? (
@@ -169,33 +166,33 @@ const Cart = () => {
 
           <p className="text-sm font-medium uppercase">Delivery Address</p>
 
-          {!localGuest.address || isEditingAddress ? (
+          {!guest.address || isEditingAddress ? (
             <div className="space-y-2 mt-2">
               <input
                 placeholder="Name"
-                value={localGuest.name}
+                value={guest.name}
                 onChange={(e) =>
-                  setLocalGuest({ ...localGuest, name: e.target.value })
+                  setGuest({ ...guest, name: e.target.value })
                 }
                 className="w-full border px-3 py-2"
               />
               <input
                 placeholder="WhatsApp Number"
-                value={localGuest.phone}
+                value={guest.phone}
                 onChange={(e) =>
-                  setLocalGuest({ ...localGuest, phone: e.target.value })
+                  setGuest({ ...guest, phone: e.target.value })
                 }
                 className="w-full border px-3 py-2"
               />
               <textarea
                 placeholder="Full Address"
-                value={localGuest.address}
+                value={guest.address}
                 onChange={(e) =>
-                  setLocalGuest({ ...localGuest, address: e.target.value })
+                  setGuest({ ...guest, address: e.target.value })
                 }
                 className="w-full border px-3 py-2"
               />
-              {localGuest.address && (
+              {guest.address && (
                 <button
                   onClick={() => setIsEditingAddress(false)}
                   className="text-indigo-500 text-sm"
@@ -206,7 +203,7 @@ const Cart = () => {
             </div>
           ) : (
             <div className="mt-2">
-              <p className="text-gray-600">{localGuest.address}</p>
+              <p className="text-gray-600">{guest.address}</p>
               <button
                 onClick={() => setIsEditingAddress(true)}
                 className="text-indigo-500 text-sm mt-1"
@@ -234,6 +231,7 @@ const Cart = () => {
           </button>
         </div>
       </div>
+      
     </div>
   );
 };
