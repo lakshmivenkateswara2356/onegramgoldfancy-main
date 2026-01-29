@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import axios from "axios";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 /* =====================================================
    CONTEXT
@@ -28,27 +21,28 @@ const AdminProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoadingProducts(true);
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get(
+      "https://onegramgoldfancy-main.onrender.com/api/products"
+    );
 
-      const res = await axios.get(`${API_URL}/products`);
+    const formatted = res.data.map((p) => ({
+      ...p,
 
-      const formatted = res.data.map((p) => ({
-        ...p,
-        image:
-          Array.isArray(p.images) && p.images.length > 0
-            ? p.images[0]
-            : "https://via.placeholder.com/120",
-      }));
+      // ✅ ALWAYS PROVIDE SINGLE IMAGE FOR UI
+      image:
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images[0]
+          : "https://via.placeholder.com/120",
+    }));
 
-      setProducts(formatted);
-    } catch (err) {
-      console.error("Admin fetch products error:", err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, []);
+    setProducts(formatted);
+  } catch (err) {
+    console.error("Admin fetch products error:", err);
+  }
+};
+
 
   /* =====================================================
      BANNERS
@@ -79,14 +73,14 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS
+     ORDERS (ADMIN ONLY)
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) return console.error("No token found");
 
     try {
       setLoadingOrders(true);
@@ -96,24 +90,29 @@ const AdminProvider = ({ children }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) return;
 
+      if (!res.ok) {
+        console.error("Fetch orders failed:", data);
+        return;
+      }
+
+      // Support backend response { orders: [...] } or array at root
       const ordersArray = Array.isArray(data) ? data : data.orders || [];
 
-      setOrders(
-        ordersArray.map((o) => ({
-          id: o.id,
-          customer: o.customer_name || "Guest",
-          phone: o.phone || "-",
-          address: o.address || "-",
-          grams: o.grams || 0,
-          total: o.total_amount || 0,
-          status: o.status?.toLowerCase() || "pending",
-          createdAt: o.created_at || new Date().toISOString(),
-          trackingId: o.tracking_id || "",
-          courierName: o.courier_name || "",
-        }))
-      );
+      const formatted = ordersArray.map((o) => ({
+        id: o.id,
+        customer: o.customer_name || "Guest",
+        phone: o.phone || "-",
+        address: o.address || "-",
+        grams: o.grams || 0,
+        total: o.total_amount || 0,
+        status: o.status ? o.status.toLowerCase() : "pending",
+        createdAt: o.created_at || new Date().toISOString(),
+        trackingId: o.tracking_id || "",
+        courierName: o.courier_name || "",
+      }));
+
+      setOrders(formatted);
     } catch (err) {
       console.error("Fetch orders error:", err);
     } finally {
@@ -136,16 +135,19 @@ const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
+        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
+        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
+        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,
