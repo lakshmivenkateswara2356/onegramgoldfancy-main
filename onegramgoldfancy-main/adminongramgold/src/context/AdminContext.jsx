@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import axios from "axios";
 
 /* =====================================================
    CONTEXT
