@@ -1,261 +1,241 @@
-import { createContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { AppContext } from "../context/AppContext";
+import Navbar from "../Components/Navbar";
 import axios from "axios";
-import toast from "react-hot-toast";
-import goldring from "../Assets/rings.webp";
-import chain from "../Assets/goldchains.jpg";
-import pendent from "../Assets/pendent.jpg";
+import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export const AppContext = createContext(null);
+const Cart = () => {
+  const { cart, removeFromCart, updateQuantity, clearCart, guest } =
+    useContext(AppContext);
 
-const AppProvider = ({ children }) => {
-  /* ------------------ UI ------------------ */
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-  /* ------------------ USER ------------------ */
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localGuest, setLocalGuest] = useState({
+    name: "",
+    phone: "",
+    address: "",
   });
 
+  /* ---------------- LOAD SAVED ADDRESS ---------------- */
   useEffect(() => {
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-    else localStorage.removeItem("user");
-  }, [user]);
-
-  /* ------------------ GUEST ------------------ */
-  const [guest, setGuest] = useState(() => {
-    const saved = localStorage.getItem("guest");
-    return saved ? JSON.parse(saved) : { name: "", phone: "", address: "" };
-  });
-
-  const updateGuest = (data) => {
-    setGuest((prev) => ({ ...prev, ...data }));
-  };
-
-  useEffect(() => {
-    localStorage.setItem("guest", JSON.stringify(guest));
+    if (guest.name || guest.phone || guest.address) {
+      setLocalGuest(guest);
+    } else {
+      const saved = localStorage.getItem("deliveryAddress");
+      if (saved) {
+        setLocalGuest(JSON.parse(saved));
+      }
+    }
   }, [guest]);
 
-  /* ------------------ CART ------------------ */
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem("cart");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i.id === product.id);
+  /* ---------------- CONFIRM ORDER ---------------- */
+  const confirmOrder = async () => {
+    // ✅ Get logged-in user token
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    const token = savedUser?.token;
 
-      if (exists) {
-        toast.success("Quantity updated in cart 🛒");
-        return prev.map((i) =>
-          i.id === product.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        );
-      }
+    if (!token) {
+      alert("Please login to place order");
+      return;
+    }
 
-      toast.success("Item added to cart 🛒");
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
+    if (!localGuest.name || !localGuest.phone || !localGuest.address) {
+      alert("Please fill delivery details");
+      return;
+    }
 
-  const removeFromCart = (id) =>
-    setCart((prev) => prev.filter((i) => i.id !== id));
+    if (cart.length === 0) {
+      alert("Your cart is empty");
+      return;
+    }
 
-  const updateQuantity = (id, quantity) => {
-    if (quantity < 1) return;
-    setCart((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
-    );
-  };
+    setLoading(true);
 
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem("cart");
-  };
+    // Save address permanently
+    localStorage.setItem("deliveryAddress", JSON.stringify(localGuest));
 
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+    const orderPayload = {
+      grams: cart.reduce((sum, item) => sum + item.quantity, 0),
+      total_amount: subtotal,
+      customer_name: localGuest.name,
+      phone: localGuest.phone,
+      address: localGuest.address,
+    };
 
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-
-  /* ------------------ WISHLIST ------------------ */
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem("wishlist");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const toggleWishlist = (id) => {
-    setWishlist((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  /* ------------------ PRODUCTS ------------------ */
-  const [products, setProducts] = useState({});
-  const [loadingProducts, setLoadingProducts] = useState(true);
-
-  const fetchProducts = async () => {
     try {
-      setLoadingProducts(true);
-      const res = await axios.get(
-        "https://onegramgoldfancy-main.onrender.com/api/products",
-        
+      await axios.post(
+        "https://onegramgoldfancy-main.onrender.com/api/orders",
+        orderPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      const data = res.data || [];
-
-      const grouped = data.reduce((acc, product) => {
-        const cat = product.category.toLowerCase().replace(/\s+/g, "-");
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push({
-          ...product,
-          price: Number(product.price) || 0,
-          oldPrice: product.old_price ? Number(product.old_price) : null,
-          discount:
-            product.old_price && product.price
-              ? Math.round(
-                  ((Number(product.old_price) - Number(product.price)) /
-                    Number(product.old_price)) *
-                    100
-                )
-              : 0,
-          image: product.image_url || "https://via.placeholder.com/120",
-        });
-        return acc;
-      }, {});
-
-      setProducts(grouped);
+      clearCart();
+      navigate("/order-success");
     } catch (err) {
-      console.error("Failed to fetch products:", err);
+      console.error(err);
+      alert("Order failed: " + (err.response?.data?.message || ""));
     } finally {
-      setLoadingProducts(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  /* ------------------ MINI PRODUCTS ------------------ */
-  const [miniProducts, setMiniProducts] = useState([]);
-
-  useEffect(() => {
-    setMiniProducts([
-      {
-        id: 1,
-        name: "Gold Ring",
-        category: "one-gram-gold",
-        image:
-         goldring,
-      },
-      {
-        id: 2,
-        name: "Gold Chain",
-        category: "one-gram-gold",
-        image:
-          chain,
-      },
-      {
-        id: 3,
-        name: "Panchalohalu Pendant",
-        category: "panchalohalu",
-        image:
-          pendent,
-      },
-    ]);
-  }, []);
-
-  /* ------------------ BANNERS (FIXED) ------------------ */
-  const [banners, setBanners] = useState(() => {
-    const cached = localStorage.getItem("cachedBanners");
-    return cached ? JSON.parse(cached) : [];
-  });
-
-  const [loadingBanners, setLoadingBanners] = useState(true);
-
-  const fetchBanners = async () => {
-    try {
-      const res = await axios.get(
-        "https://onegramgoldfancy-main.onrender.com/api/banners"
-      );
-
-      if (res.data && res.data.length > 0) {
-        setBanners(res.data);
-        localStorage.setItem("cachedBanners", JSON.stringify(res.data));
-      }
-    } catch (err) {
-      console.warn("Backend sleeping, using cached banners");
-      // IMPORTANT: do NOT clear banners
-    } finally {
-      setLoadingBanners(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBanners();
-  }, []);
-
-  /* ------------------ BUY NOW ------------------ */
-  const buyNow = (product, navigate) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i.id === product.id);
-      if (exists) return prev;
-      return [...prev, { ...product, quantity: 1 }];
-    });
-
-    toast.success("Proceeding to checkout 💳");
-    navigate("/cart");
-  };
-
-  /* ------------------ CONTEXT ------------------ */
   return (
-    <AppContext.Provider
-      value={{
-        /* UI */
-        isMenuOpen,
-        setIsMenuOpen,
+    <div className="bg-[#fafafa] min-h-screen">
+      <Navbar />
 
-        /* User */
-        user,
-        setUser,
+      <div className="pt-20 px-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-10">
+        {/* ---------------- CART ITEMS ---------------- */}
+        <div className="flex-1">
+          <h1 className="text-3xl font-medium mb-6">
+            Shopping Cart{" "}
+            <span className="text-sm text-indigo-500">{cart.length} Items</span>
+          </h1>
 
-        /* Guest */
-        guest,
-        updateGuest,
+          {cart.length === 0 ? (
+            <p className="text-gray-500">Your cart is empty</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-[2fr_1fr_1fr] text-gray-500 font-medium pb-3">
+                <p>Product Details</p>
+                <p className="text-center">Subtotal</p>
+                <p className="text-center">Action</p>
+              </div>
 
-        /* Cart */
-        cart,
-        cartCount,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        buyNow,
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[2fr_1fr_1fr] items-center pt-4"
+                >
+                  <div className="flex gap-4">
+                    <img
+                      src={item.image}
+                      className="w-24 h-24 object-cover border rounded"
+                      alt={item.name}
+                    />
+                    <div>
+                      <p className="font-semibold">{item.name}</p>
+                      <div className="text-sm text-gray-500">
+                        <div className="flex items-center gap-1">
+                          Qty:
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateQuantity(
+                                item.id,
+                                Math.max(1, +e.target.value)
+                              )
+                            }
+                            className="w-14 border px-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-        /* Wishlist */
-        wishlist,
-        toggleWishlist,
+                  <p className="text-center font-medium">
+                    ₹{item.price * item.quantity}
+                  </p>
 
-        /* Products */
-        products,
-        miniProducts,
-        loadingProducts,
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="mx-auto text-red-500"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
 
-        /* Banners */
-        banners,
-        loadingBanners,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+        {/* ---------------- ORDER SUMMARY ---------------- */}
+        <div className="max-w-[360px] w-full bg-gray-100/40 p-5 border">
+          <h2 className="text-xl font-medium">Order Summary</h2>
+          <hr className="my-4" />
+
+          <p className="text-sm font-medium uppercase">Delivery Address</p>
+
+          {!localGuest.address || isEditingAddress ? (
+            <div className="space-y-2 mt-2">
+              <input
+                placeholder="Name"
+                value={localGuest.name}
+                onChange={(e) =>
+                  setLocalGuest({ ...localGuest, name: e.target.value })
+                }
+                className="w-full border px-3 py-2"
+              />
+              <input
+                placeholder="WhatsApp Number"
+                value={localGuest.phone}
+                onChange={(e) =>
+                  setLocalGuest({ ...localGuest, phone: e.target.value })
+                }
+                className="w-full border px-3 py-2"
+              />
+              <textarea
+                placeholder="Full Address"
+                value={localGuest.address}
+                onChange={(e) =>
+                  setLocalGuest({ ...localGuest, address: e.target.value })
+                }
+                className="w-full border px-3 py-2"
+              />
+              {localGuest.address && (
+                <button
+                  onClick={() => setIsEditingAddress(false)}
+                  className="text-indigo-500 text-sm"
+                >
+                  Save Address
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="mt-2">
+              <p className="text-gray-600">{localGuest.address}</p>
+              <button
+                onClick={() => setIsEditingAddress(true)}
+                className="text-indigo-500 text-sm mt-1"
+              >
+                Change
+              </button>
+            </div>
+          )}
+
+          <hr className="my-4" />
+
+          <p className="flex justify-between text-gray-700">
+            <span>Total</span>
+            <span className="font-semibold">₹{subtotal}</span>
+          </p>
+
+          <button
+            onClick={confirmOrder}
+            disabled={loading}
+            className={`w-full py-3 mt-6 text-white transition
+              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-500 hover:bg-indigo-600"}
+            `}
+          >
+            {loading ? "Placing Order..." : "Place Order"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default AppProvider;
+export default Cart;
