@@ -101,43 +101,50 @@ const AppProvider = ({ children }) => {
   const [products, setProducts] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  const fetchProducts = async () => {
-    try {
-      setLoadingProducts(true);
-      const res = await axios.get(
-        "https://onegramgoldfancy-main.onrender.com/api/products",
-        
-      );
+ const fetchProducts = async () => {
+  try {
+    setLoadingProducts(true);
+    const res = await axios.get(
+      "https://onegramgoldfancy-main.onrender.com/api/products"
+    );
 
-      const data = res.data || [];
+    const data = res.data || [];
 
-      const grouped = data.reduce((acc, product) => {
-        const cat = product.category.toLowerCase().replace(/\s+/g, "-");
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push({
-          ...product,
-          price: Number(product.price) || 0,
-          oldPrice: product.old_price ? Number(product.old_price) : null,
-          discount:
-            product.old_price && product.price
-              ? Math.round(
-                  ((Number(product.old_price) - Number(product.price)) /
-                    Number(product.old_price)) *
-                    100
-                )
-              : 0,
-          image: product.image_url || "https://via.placeholder.com/120",
-        });
-        return acc;
-      }, {});
+    const grouped = data.reduce((acc, product) => {
+      const cat = product.category?.toLowerCase().replace(/\s+/g, "-");
+      if (!acc[cat]) acc[cat] = [];
 
-      setProducts(grouped);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
+      acc[cat].push({
+        ...product,
+        price: Number(product.price) || 0,
+        oldPrice: product.old_price ? Number(product.old_price) : null,
+        discount:
+          product.old_price && product.price
+            ? Math.round(
+                ((Number(product.old_price) - Number(product.price)) /
+                  Number(product.old_price)) *
+                  100
+              )
+            : 0,
+
+        // ✅ FIXED IMAGE HANDLING
+        image:
+          Array.isArray(product.images) && product.images.length > 0
+            ? product.images[0]
+            : "https://via.placeholder.com/120",
+      });
+
+      return acc;
+    }, {});
+
+    setProducts(grouped);
+  } catch (err) {
+    console.error("Failed to fetch products:", err);
+  } finally {
+    setLoadingProducts(false);
+  }
+};
+
 
   useEffect(() => {
     fetchProducts();
