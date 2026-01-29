@@ -13,24 +13,32 @@ const OrderSuccess = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center
-      bg-gradient-to-br from-[#1f2933] via-[#111827] to-black px-4">
-
+    <div
+      className="
+        flex items-center justify-center
+        min-h-screen
+        bg-gradient-to-br from-[#1f2933] via-[#111827] to-black
+        px-4 py-6
+      "
+    >
       <div
         className="
           bg-white/95 backdrop-blur
           rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]
           max-w-md w-full p-10 text-center
           animate-[fadeIn_0.6s_ease-out]
-        ">
+        "
+      >
         {/* ICON */}
         <div className="flex justify-center mb-6">
-          <div className="
-            w-24 h-24 rounded-full
-            bg-gradient-to-br from-yellow-300 to-yellow-500
-            flex items-center justify-center
-            shadow-lg animate-[scaleUp_0.5s_ease-out]
-          ">
+          <div
+            className="
+              w-24 h-24 rounded-full
+              bg-gradient-to-br from-yellow-300 to-yellow-500
+              flex items-center justify-center
+              shadow-lg animate-[scaleUp_0.5s_ease-out]
+            "
+          >
             <CheckCircle size={56} className="text-white" />
           </div>
         </div>
@@ -42,9 +50,8 @@ const OrderSuccess = () => {
 
         {/* DESCRIPTION */}
         <p className="text-gray-600 mt-3 leading-relaxed text-sm">
-          Thank you for choosing <span className="font-medium text-gray-800">
-            OneGram Gold Fancy
-          </span>.
+          Thank you for choosing{" "}
+          <span className="font-medium text-gray-800">OneGram Gold Fancy</span>.
           <br />
           Your order has been successfully placed and is now being prepared.
         </p>
