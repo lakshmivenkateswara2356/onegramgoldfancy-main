@@ -20,7 +20,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-    "https://onegramgoldfancy-main.vercel.app",
+    "https://onegramgoldfancy.vercel.app",
     "https://onegramgoldfancy-main-6x68.vercel.app",
     "http://localhost:3000",
    
