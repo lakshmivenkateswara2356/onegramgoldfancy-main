@@ -17,21 +17,24 @@ const AdminLogin = () => {
     try {
       const res = await axios.post(
         "https://onegramgoldfancy-main.onrender.com/api/auth/login",
-        { email, password }
+        { email, password },
+        { withCredentials: true }
       );
 
       const { token, user } = res.data;
 
-      if (!token || user.role !== "admin") {
+      if (!token || user?.role !== "admin") {
         setError("Unauthorized admin access");
+        setLoading(false);
         return;
       }
 
-      // ✅ MATCH PROTECTED ROUTE
+      // ✅ MUST MATCH ProtectedRoute
       localStorage.setItem("adminToken", token);
       localStorage.setItem("adminUser", JSON.stringify(user));
 
-      navigate("/admin/dashboard");
+      // ✅ IMPORTANT: replace prevents back-navigation bug
+      navigate("/admin/dashboard", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
@@ -50,8 +53,6 @@ const AdminLogin = () => {
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
         <input
-          id="admin-email"
-          name="email"
           type="email"
           required
           placeholder="Admin Email"
@@ -61,8 +62,6 @@ const AdminLogin = () => {
         />
 
         <input
-          id="admin-password"
-          name="password"
           type="password"
           required
           placeholder="Password"
