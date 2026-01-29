@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: [
     "https://onegramgoldfancy.vercel.app",
-    "https://onegramgoldfancy-main-6x68.vercel.app",
+    "https://onegramgoldfancyadmin.vercel.app",
     "http://localhost:3000",
    
   ], // replace with frontend URL in production
