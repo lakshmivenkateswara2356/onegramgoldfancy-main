@@ -12,12 +12,10 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   // ✅ IMAGE RESOLUTION LOGIC (VERY IMPORTANT)
-  const imageSrc =
-    product?.images?.length > 0
-      ? product.images[0]               // ✅ new multi-image support
-      : product?.image_url
-      ? product.image_url               // ✅ old single image support
-      : fallbackImage;                  // ✅ fallback
+   const imageSrc =
+    Array.isArray(product.images) && product.images.length > 0
+      ? product.images[0]
+      : fallbackImage;               // ✅ fallback
 
   return (
     <div
