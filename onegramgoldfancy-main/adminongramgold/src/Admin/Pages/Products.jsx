@@ -12,14 +12,14 @@ const Products = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Form with 5 images slots
+  // Form with 5 image slots
   const initialForm = {
     name: "",
     category: "",
     price: "",
     oldPrice: "",
     stock: "",
-    images: [null, null, null, null, null], // 5 image files
+    images: [null, null, null, null, null], // 5 image slots
   };
 
   const [form, setForm] = useState(initialForm);
@@ -48,9 +48,9 @@ const Products = () => {
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
           images:
-            p.images?.length > 0
+            p.images && p.images.length > 0
               ? p.images
-              : [p.image_url || "https://via.placeholder.com/120"],
+              : ["https://via.placeholder.com/120"], // fallback
         };
       });
 
@@ -96,7 +96,7 @@ const Products = () => {
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
 
-      // Append images (only selected ones)
+      // Append selected images
       form.images.forEach((img) => {
         if (img) formData.append("images", img);
       });
@@ -111,7 +111,9 @@ const Products = () => {
       fetchProducts();
     } catch (err) {
       console.error("Save product failed", err);
-      alert("Failed to save product. Make sure backend is configured for Cloudinary.");
+      alert(
+        "Failed to save product. Make sure backend is configured for Cloudinary."
+      );
     }
   };
 
@@ -119,9 +121,11 @@ const Products = () => {
   const handleEdit = (product) => {
     setEditingId(product.id);
     const imagesArray = [null, null, null, null, null];
+
     if (product.images && product.images.length) {
       product.images.forEach((img, i) => (imagesArray[i] = img));
     }
+
     setForm({
       name: product.name,
       category: product.category,
@@ -219,7 +223,11 @@ const Products = () => {
             img ? (
               <img
                 key={i}
-                src={typeof img === "string" ? img : URL.createObjectURL(img)}
+                src={
+                  typeof img === "string"
+                    ? img // URL from backend
+                    : URL.createObjectURL(img) // newly selected file
+                }
                 alt="preview"
                 className="w-24 h-24 object-cover rounded"
               />
