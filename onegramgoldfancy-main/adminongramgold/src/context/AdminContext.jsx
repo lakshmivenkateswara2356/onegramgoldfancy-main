@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 /* =====================================================
    CONTEXT
@@ -18,8 +12,8 @@ const API_URL = "https://onegramgoldfancy-main.onrender.com/api";
    PROVIDER
 ===================================================== */
 const AdminProvider = ({ children }) => {
-  /* ================= TOKEN (FIXED) ================= */
-  const getToken = () => localStorage.getItem("adminToken");
+  /* ================= TOKEN ================= */
+  const getToken = () => localStorage.getItem("token");
 
   /* =====================================================
      PRODUCTS
@@ -27,45 +21,28 @@ const AdminProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
-    const token = getToken();
-    if (!token) return;
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get(
+      "https://onegramgoldfancy-main.onrender.com/api/products"
+    );
 
-    try {
-      setLoadingProducts(true);
+    const formatted = res.data.map((p) => ({
+      ...p,
 
-      const res = await fetch(`${API_URL}/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // ✅ ALWAYS PROVIDE SINGLE IMAGE FOR UI
+      image:
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images[0]
+          : "https://via.placeholder.com/120",
+    }));
 
-      if (!res.ok) throw new Error("Failed to fetch products");
+    setProducts(formatted);
+  } catch (err) {
+    console.error("Admin fetch products error:", err);
+  }
+};
 
-      const data = await res.json();
-
-      const formatted = (
-        Array.isArray(data) ? data : data.products || []
-      ).map((o) => ({
-        id: o.id,
-        customer: o.customer_name || o.name || "Guest",
-        phone: o.phone || "-",
-        address: o.address || "-",
-        grams: o.grams || 0,
-        total: o.total_amount || 0,
-        status: o.status ? o.status.toLowerCase() : "pending",
-        createdAt: o.created_at || new Date().toISOString(),
-        trackingId: o.tracking_id || "",
-        courierName: o.courier_name || "",
-      }));
-
-      setProducts(formatted);
-    } catch (err) {
-      console.error("Fetch products error:", err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, []);
 
   /* =====================================================
      BANNERS
@@ -81,9 +58,7 @@ const AdminProvider = ({ children }) => {
       setLoadingBanners(true);
 
       const res = await fetch(`${API_URL}/banners`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("Failed to fetch banners");
@@ -105,15 +80,13 @@ const AdminProvider = ({ children }) => {
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) return console.error("No token found");
 
     try {
       setLoadingOrders(true);
 
       const res = await fetch(`${API_URL}/orders/admin`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -123,6 +96,7 @@ const AdminProvider = ({ children }) => {
         return;
       }
 
+      // Support backend response { orders: [...] } or array at root
       const ordersArray = Array.isArray(data) ? data : data.orders || [];
 
       const formatted = ordersArray.map((o) => ({
