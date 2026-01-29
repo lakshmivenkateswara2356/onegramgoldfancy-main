@@ -11,6 +11,14 @@ const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
+  // ✅ IMAGE RESOLUTION LOGIC (VERY IMPORTANT)
+  const imageSrc =
+    product?.images?.length > 0
+      ? product.images[0]               // ✅ new multi-image support
+      : product?.image_url
+      ? product.image_url               // ✅ old single image support
+      : fallbackImage;                  // ✅ fallback
+
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
@@ -21,20 +29,23 @@ const ProductCard = ({ product }) => {
         hover:shadow-[0_20px_45px_rgba(0,0,0,0.12)]
         transition-all duration-300
         overflow-hidden
-        min-w-[160px]      /* ✅ Set minimum width */
-    flex-shrink-0  
+        min-w-[160px]
+        flex-shrink-0
       "
     >
       {/* IMAGE */}
       <div className="relative h-44 bg-gray-100 overflow-hidden">
         <img
-          src={product.image || fallbackImage}
+          src={imageSrc}
           alt={product.name}
           className="
             w-full h-full object-cover
             transition-transform duration-500
             group-hover:scale-110
           "
+          onError={(e) => {
+            e.currentTarget.src = fallbackImage;
+          }}
         />
 
         <span
@@ -62,7 +73,7 @@ const ProductCard = ({ product }) => {
         {/* ADD TO CART */}
         <button
           onClick={(e) => {
-            e.stopPropagation(); // 🔥 VERY IMPORTANT
+            e.stopPropagation(); // 🔥 IMPORTANT
             addToCart(product);
           }}
           className="
