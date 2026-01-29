@@ -1,5 +1,4 @@
 const Product = require("../models/product.model");
-const cloudinary = require("../config/cloudinary");
 
 // Helper
 const calculateDiscount = (price, oldPrice) => {
@@ -12,24 +11,8 @@ exports.addProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_urls = [];
-
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const uploaded = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "products" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(file.buffer);
-        });
-
-        image_urls.push(uploaded.secure_url);
-      }
-    }
+    // ✅ Cloudinary already uploaded → file.path
+    const image_urls = req.files?.map((file) => file.path) || [];
 
     const discount = calculateDiscount(Number(price), Number(old_price));
 
@@ -41,7 +24,7 @@ exports.addProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls, // ✅ ARRAY
+      images: image_urls,
     });
 
     res.status(201).json(product);
@@ -56,26 +39,10 @@ exports.editProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_urls;
-
-    if (req.files && req.files.length > 0) {
-      image_urls = [];
-
-      for (const file of req.files) {
-        const uploaded = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "products" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(file.buffer);
-        });
-
-        image_urls.push(uploaded.secure_url);
-      }
-    }
+    const image_urls =
+      req.files && req.files.length > 0
+        ? req.files.map((file) => file.path)
+        : null;
 
     const discount = calculateDiscount(Number(price), Number(old_price));
 
@@ -87,7 +54,7 @@ exports.editProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls, // optional
+      images: image_urls,
     });
 
     res.json(product);
