@@ -44,7 +44,7 @@ const FeaturedProducts = () => {
 
       {/* PRODUCTS */}
       {!showSkeleton && (
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 w-[60px]">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
