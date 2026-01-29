@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 
 /* =====================================================
    CONTEXT
@@ -12,8 +18,8 @@ const API_URL = "https://onegramgoldfancy-main.onrender.com/api";
    PROVIDER
 ===================================================== */
 const AdminProvider = ({ children }) => {
-  /* ================= TOKEN ================= */
-  const getToken = () => localStorage.getItem("token");
+  /* ================= TOKEN (FIXED) ================= */
+  const getToken = () => localStorage.getItem("adminToken");
 
   /* =====================================================
      PRODUCTS
@@ -29,14 +35,18 @@ const AdminProvider = ({ children }) => {
       setLoadingProducts(true);
 
       const res = await fetch(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Failed to fetch products");
 
       const data = await res.json();
 
-      const formatted = (Array.isArray(data) ? data : data.products || []).map((o) => ({
+      const formatted = (
+        Array.isArray(data) ? data : data.products || []
+      ).map((o) => ({
         id: o.id,
         customer: o.customer_name || o.name || "Guest",
         phone: o.phone || "-",
@@ -71,7 +81,9 @@ const AdminProvider = ({ children }) => {
       setLoadingBanners(true);
 
       const res = await fetch(`${API_URL}/banners`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Failed to fetch banners");
@@ -93,13 +105,15 @@ const AdminProvider = ({ children }) => {
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) return console.error("No token found");
+    if (!token) return;
 
     try {
       setLoadingOrders(true);
 
       const res = await fetch(`${API_URL}/orders/admin`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -109,7 +123,6 @@ const AdminProvider = ({ children }) => {
         return;
       }
 
-      // Support backend response { orders: [...] } or array at root
       const ordersArray = Array.isArray(data) ? data : data.orders || [];
 
       const formatted = ordersArray.map((o) => ({
