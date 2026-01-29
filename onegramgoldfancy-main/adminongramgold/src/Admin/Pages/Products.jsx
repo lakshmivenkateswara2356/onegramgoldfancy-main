@@ -18,7 +18,7 @@ const Products = () => {
     price: "",
     oldPrice: "",
     stock: "",
-    imageFile: "", // local file for preview
+    imageFiles: [], // array of local files for preview
   });
 
   /* ---------------- FETCH PRODUCTS ---------------- */
@@ -44,7 +44,7 @@ const Products = () => {
           discount,
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
-          image: p.image_url || "https://via.placeholder.com/120",
+          images: p.images || [p.image_url || "https://via.placeholder.com/120"], // array of image URLs
         };
       });
 
@@ -63,10 +63,14 @@ const Products = () => {
   /* ---------------- FORM HANDLERS ---------------- */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "imageFile" ? files[0] : value,
-    }));
+
+    if (name === "imageFiles") {
+      // Allow up to 5 images
+      const selectedFiles = Array.from(files).slice(0, 5);
+      setForm((prev) => ({ ...prev, imageFiles: selectedFiles }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const resetForm = () => {
@@ -76,7 +80,7 @@ const Products = () => {
       price: "",
       oldPrice: "",
       stock: "",
-      imageFile: null,
+      imageFiles: [],
     });
     setEditingId(null);
   };
@@ -92,7 +96,11 @@ const Products = () => {
       formData.append("price", form.price);
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
-      if (form.imageFile) formData.append("image", form.imageFile);
+
+      // Append multiple images
+      form.imageFiles.forEach((file, idx) => {
+        formData.append(`images`, file);
+      });
 
       if (editingId) {
         await updateProductAPI(editingId, formData);
@@ -116,7 +124,7 @@ const Products = () => {
       price: product.price,
       oldPrice: product.oldPrice || "",
       stock: product.stock,
-      imageFile: null,
+      imageFiles: [], // new images can be added
     });
   };
 
@@ -189,20 +197,26 @@ const Products = () => {
           />
           <input
             type="file"
-            name="imageFile"
+            name="imageFiles"
             onChange={handleChange}
             className="border rounded-lg px-3 py-2"
             accept="image/*"
+            multiple
           />
         </div>
 
         {/* IMAGE PREVIEW */}
-        {form.imageFile && (
-          <img
-            src={URL.createObjectURL(form.imageFile)}
-            alt="preview"
-            className="w-24 h-24 object-cover rounded"
-          />
+        {form.imageFiles.length > 0 && (
+          <div className="flex gap-2 mt-2">
+            {form.imageFiles.map((file, idx) => (
+              <img
+                key={idx}
+                src={URL.createObjectURL(file)}
+                alt={`preview-${idx}`}
+                className="w-24 h-24 object-cover rounded"
+              />
+            ))}
+          </div>
         )}
 
         <div className="flex gap-3">
@@ -243,11 +257,16 @@ const Products = () => {
               {products.map((p) => (
                 <tr key={p.id} className="border-t">
                   <td className="px-4 py-3 flex items-center gap-3">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      className="w-14 h-14 rounded border object-cover"
-                    />
+                    <div className="flex gap-1">
+                      {p.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={p.name}
+                          className="w-12 h-12 rounded border object-cover"
+                        />
+                      ))}
+                    </div>
                     {p.name}
                   </td>
                   <td className="px-4 py-3">{p.category}</td>
