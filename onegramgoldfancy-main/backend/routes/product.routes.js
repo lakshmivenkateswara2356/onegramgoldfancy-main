@@ -6,21 +6,21 @@ const productController = require("../controllers/product.controller");
 // ADD PRODUCT (single or multiple images)
 router.post(
   "/add",
-  upload.array("images", 5), // ✅ VERY IMPORTANT
+  upload.array("images", 5),
   productController.addProduct
 );
 
 // GET ALL PRODUCTS
-router.get("/", productController.getAllProducts);
+router.get("/", productController.getProducts);
 
 // UPDATE PRODUCT
 router.put(
   "/:id",
-  upload.array("images", 5), // ✅ VERY IMPORTANT
-  productController.updateProduct
+  upload.array("images", 5),
+  productController.editProduct
 );
 
 // DELETE PRODUCT
-router.delete("/:id", productController.deleteProduct);
+router.delete("/:id", productController.removeProduct);
 
 module.exports = router;
