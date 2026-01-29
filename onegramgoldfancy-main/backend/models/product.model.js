@@ -15,7 +15,7 @@ exports.createProduct = async (data) => {
 
   const result = await pool.query(
     `INSERT INTO products
-     (name, description, price, stock, image_url, category, old_price, discount)
+     (name, description, price, stock, image, category, old_price, discount)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      RETURNING *`,
     [

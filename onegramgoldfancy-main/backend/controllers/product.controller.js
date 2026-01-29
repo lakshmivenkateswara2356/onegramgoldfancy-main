@@ -12,38 +12,30 @@ exports.addProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_url = null;
+    let image_urls = [];
 
-    // Upload to Cloudinary if file exists
-    if (req.file) {
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: "products" },
-        async (error, result) => {
-          if (error) return res.status(500).json({ error: error.message });
-          image_url = result.secure_url;
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uploadResult = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "products" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
 
-          const discount = calculateDiscount(Number(price), Number(old_price));
-
-          const product = await Product.createProduct({
-            name,
-            category,
-            price,
-            stock,
-            old_price,
-            description,
-            image_url,
-            discount,
-          });
-
-          res.status(201).json(product);
-        }
-      );
-      result.end(req.file.buffer); // upload file buffer
-      return;
+        image_urls.push(uploadResult.secure_url);
+      }
     }
 
-    // If no image uploaded
-    const discount = calculateDiscount(Number(price), Number(old_price));
+    const discount =
+      old_price && old_price > price
+        ? Math.round(((old_price - price) / old_price) * 100)
+        : 0;
+
     const product = await Product.createProduct({
       name,
       category,
@@ -51,7 +43,7 @@ exports.addProduct = async (req, res) => {
       stock,
       old_price,
       description,
-      image_url: null,
+      images: image_urls, // ✅ array
       discount,
     });
 
@@ -61,6 +53,7 @@ exports.addProduct = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 /* ---------------- UPDATE PRODUCT ---------------- */
 exports.editProduct = async (req, res) => {
