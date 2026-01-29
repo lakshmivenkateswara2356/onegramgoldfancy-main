@@ -1,6 +1,7 @@
 const Product = require("../models/product.model");
+const cloudinary = require("../config/cloudinary");
 
-// Helper
+/* ---------------- HELPER ---------------- */
 const calculateDiscount = (price, oldPrice) => {
   if (!oldPrice || oldPrice <= price) return 0;
   return Math.round(((oldPrice - price) / oldPrice) * 100);
@@ -9,10 +10,28 @@ const calculateDiscount = (price, oldPrice) => {
 /* ---------------- ADD PRODUCT ---------------- */
 exports.addProduct = async (req, res) => {
   try {
-    const { name, category, price, stock, old_price, description } = req.body;
+    const {
+      name,
+      category,
+      price,
+      stock,
+      old_price,
+      description,
+    } = req.body;
 
-    // ✅ images already uploaded by multer-cloudinary
-    const image_urls = req.files?.map((file) => file.path) || [];
+    // ✅ Collect Cloudinary image URLs
+    const image_urls =
+      req.files && req.files.length > 0
+        ? req.files.map((file) => file.path)
+        : [];
+
+    if (!name || !category || !price || !stock) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    if (image_urls.length === 0) {
+      return res.status(400).json({ message: "At least one image is required" });
+    }
 
     const discount = calculateDiscount(Number(price), Number(old_price));
 
@@ -22,27 +41,36 @@ exports.addProduct = async (req, res) => {
       price,
       stock,
       category,
-      old_price,
+      old_price: old_price || null,
       discount,
-      images: image_urls.length > 0 ? image_urls : [], // always array
+      images: image_urls, // ✅ ARRAY OF IMAGES
     });
 
     res.status(201).json(product);
   } catch (err) {
     console.error("ADD PRODUCT ERROR:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to add product" });
   }
 };
 
 /* ---------------- UPDATE PRODUCT ---------------- */
 exports.editProduct = async (req, res) => {
   try {
-    const { name, category, price, stock, old_price, description } = req.body;
+    const {
+      name,
+      category,
+      price,
+      stock,
+      old_price,
+      description,
+    } = req.body;
 
-    const image_urls =
-      req.files && req.files.length > 0
-        ? req.files.map((file) => file.path)
-        : null; // keep old images if none uploaded
+    let image_urls = null;
+
+    // ✅ If new images uploaded → replace old ones
+    if (req.files && req.files.length > 0) {
+      image_urls = req.files.map((file) => file.path);
+    }
 
     const discount = calculateDiscount(Number(price), Number(old_price));
 
@@ -52,15 +80,19 @@ exports.editProduct = async (req, res) => {
       price,
       stock,
       category,
-      old_price,
+      old_price: old_price || null,
       discount,
-      images: image_urls,
+      images: image_urls, // null keeps existing images
     });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     res.json(product);
   } catch (err) {
     console.error("UPDATE PRODUCT ERROR:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to update product" });
   }
 };
 
@@ -72,14 +104,15 @@ exports.getProducts = async (req, res) => {
     const formatted = products.map((p) => ({
       ...p,
       images:
-        Array.isArray(p.images) && p.images.length > 0
+        p.images && p.images.length > 0
           ? p.images
           : ["https://via.placeholder.com/150"],
     }));
 
     res.json(formatted);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("GET PRODUCTS ERROR:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 };
 
@@ -88,13 +121,18 @@ exports.getSingleProduct = async (req, res) => {
   try {
     const product = await Product.getProductById(req.params.id);
 
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     if (!product.images || product.images.length === 0) {
       product.images = ["https://via.placeholder.com/150"];
     }
 
     res.json(product);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("GET SINGLE PRODUCT ERROR:", err);
+    res.status(500).json({ error: "Failed to fetch product" });
   }
 };
 
@@ -104,6 +142,7 @@ exports.removeProduct = async (req, res) => {
     await Product.deleteProduct(req.params.id);
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("DELETE PRODUCT ERROR:", err);
+    res.status(500).json({ error: "Failed to delete product" });
   }
 };
