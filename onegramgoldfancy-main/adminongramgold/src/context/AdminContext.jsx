@@ -20,29 +20,29 @@ const AdminProvider = ({ children }) => {
      PRODUCTS
   ===================================================== */
   const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
-const fetchProducts = async () => {
-  try {
-    const res = await axios.get(
-      "https://onegramgoldfancy-main.onrender.com/api/products"
-    );
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoadingProducts(true);
 
-    const formatted = res.data.map((p) => ({
-      ...p,
+      const res = await axios.get(`${API_URL}/products`);
 
-      // ✅ ALWAYS PROVIDE SINGLE IMAGE FOR UI
-      image:
-        Array.isArray(p.images) && p.images.length > 0
-          ? p.images[0]
-          : "https://via.placeholder.com/120",
-    }));
+      const formatted = res.data.map((p) => ({
+        ...p,
+        image:
+          Array.isArray(p.images) && p.images.length > 0
+            ? p.images[0]
+            : "https://via.placeholder.com/120",
+      }));
 
-    setProducts(formatted);
-  } catch (err) {
-    console.error("Admin fetch products error:", err);
-  }
-};
-
+      setProducts(formatted);
+    } catch (err) {
+      console.error("Admin fetch products error:", err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
 
   /* =====================================================
      BANNERS
@@ -73,14 +73,14 @@ const fetchProducts = async () => {
   }, []);
 
   /* =====================================================
-     ORDERS (ADMIN ONLY)
+     ORDERS
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) return console.error("No token found");
+    if (!token) return;
 
     try {
       setLoadingOrders(true);
@@ -90,13 +90,8 @@ const fetchProducts = async () => {
       });
 
       const data = await res.json();
+      if (!res.ok) return;
 
-      if (!res.ok) {
-        console.error("Fetch orders failed:", data);
-        return;
-      }
-
-      // Support backend response { orders: [...] } or array at root
       const ordersArray = Array.isArray(data) ? data : data.orders || [];
 
       const formatted = ordersArray.map((o) => ({
@@ -106,7 +101,7 @@ const fetchProducts = async () => {
         address: o.address || "-",
         grams: o.grams || 0,
         total: o.total_amount || 0,
-        status: o.status ? o.status.toLowerCase() : "pending",
+        status: o.status?.toLowerCase() || "pending",
         createdAt: o.created_at || new Date().toISOString(),
         trackingId: o.tracking_id || "",
         courierName: o.courier_name || "",
@@ -135,19 +130,16 @@ const fetchProducts = async () => {
   return (
     <AdminContext.Provider
       value={{
-        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
-        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
-        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,
