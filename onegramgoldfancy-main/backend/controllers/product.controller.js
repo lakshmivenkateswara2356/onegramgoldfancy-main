@@ -1,7 +1,7 @@
 const Product = require("../models/product.model");
 const cloudinary = require("../config/cloudinary");
 
-// Helper: calculate discount
+// Helper
 const calculateDiscount = (price, oldPrice) => {
   if (!oldPrice || oldPrice <= price) return 0;
   return Math.round(((oldPrice - price) / oldPrice) * 100);
@@ -16,7 +16,7 @@ exports.addProduct = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const uploadResult = await new Promise((resolve, reject) => {
+        const uploaded = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             { folder: "products" },
             (error, result) => {
@@ -27,83 +27,72 @@ exports.addProduct = async (req, res) => {
           stream.end(file.buffer);
         });
 
-        image_urls.push(uploadResult.secure_url);
+        image_urls.push(uploaded.secure_url);
       }
     }
 
-    const discount =
-      old_price && old_price > price
-        ? Math.round(((old_price - price) / old_price) * 100)
-        : 0;
+    const discount = calculateDiscount(Number(price), Number(old_price));
 
     const product = await Product.createProduct({
       name,
-      category,
+      description,
       price,
       stock,
+      category,
       old_price,
-      description,
-      images: image_urls, // ✅ array
       discount,
+      images: image_urls, // ✅ ARRAY
     });
 
     res.status(201).json(product);
   } catch (err) {
-    console.error(err);
+    console.error("ADD PRODUCT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 /* ---------------- UPDATE PRODUCT ---------------- */
 exports.editProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_url;
+    let image_urls;
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: "products" },
-        async (error, result) => {
-          if (error) return res.status(500).json({ error: error.message });
-          image_url = result.secure_url;
+    if (req.files && req.files.length > 0) {
+      image_urls = [];
 
-          const discount = calculateDiscount(Number(price), Number(old_price));
+      for (const file of req.files) {
+        const uploaded = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "products" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
 
-          const product = await Product.updateProduct(req.params.id, {
-            name,
-            category,
-            price,
-            stock,
-            old_price,
-            description,
-            discount,
-            image_url,
-          });
-
-          res.json(product);
-        }
-      );
-      result.end(req.file.buffer);
-      return;
+        image_urls.push(uploaded.secure_url);
+      }
     }
 
-    // Update without changing image
     const discount = calculateDiscount(Number(price), Number(old_price));
 
     const product = await Product.updateProduct(req.params.id, {
       name,
-      category,
+      description,
       price,
       stock,
+      category,
       old_price,
-      description,
       discount,
+      images: image_urls, // optional
     });
 
     res.json(product);
   } catch (err) {
+    console.error("UPDATE PRODUCT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

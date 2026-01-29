@@ -7,7 +7,7 @@ exports.createProduct = async (data) => {
     description,
     price,
     stock,
-    image_url,
+    images,
     category,
     old_price,
     discount,
@@ -15,7 +15,7 @@ exports.createProduct = async (data) => {
 
   const result = await pool.query(
     `INSERT INTO products
-     (name, description, price, stock, image, category, old_price, discount)
+     (name, description, price, stock, images, category, old_price, discount)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      RETURNING *`,
     [
@@ -23,7 +23,7 @@ exports.createProduct = async (data) => {
       description,
       price,
       stock,
-      image_url,
+      images, // ✅ ARRAY
       category,
       old_price,
       discount,
@@ -45,7 +45,7 @@ exports.getAllProducts = async () => {
       old_price,
       discount,
       stock,
-      image_url,
+      images,
       created_at
      FROM products
      ORDER BY id DESC`
@@ -70,7 +70,7 @@ exports.updateProduct = async (id, data) => {
     description,
     price,
     stock,
-    image_url,
+    images,
     category,
     old_price,
     discount,
@@ -82,7 +82,7 @@ exports.updateProduct = async (id, data) => {
       description=$2,
       price=$3,
       stock=$4,
-      image_url=COALESCE($5, image_url),
+      images=COALESCE($5, images),
       category=$6,
       old_price=$7,
       discount=$8
@@ -93,7 +93,7 @@ exports.updateProduct = async (id, data) => {
       description,
       price,
       stock,
-      image_url,
+      images,
       category,
       old_price,
       discount,
