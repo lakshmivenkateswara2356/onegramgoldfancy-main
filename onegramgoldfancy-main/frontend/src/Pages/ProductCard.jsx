@@ -11,13 +11,15 @@ const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
-  // ✅ IMAGE RESOLUTION LOGIC (VERY IMPORTANT)
+  // ✅ FIXED IMAGE LOGIC
+  // Check if images array exists and has at least 1 image
+  // else fallback to image_url, else fallbackImage
   const imageSrc =
     product?.images?.length > 0
-      ? product.images[0]               // ✅ new multi-image support
-      : product?.image_url
-      ? product.image_url               // ✅ old single image support
-      : fallbackImage;                  // ✅ fallback
+      ? product.images[0]          // use first of multiple images
+      : product?.image_url          // old single image support
+      ? product.image_url
+      : fallbackImage;             // fallback if nothing
 
   return (
     <div
@@ -44,6 +46,7 @@ const ProductCard = ({ product }) => {
             group-hover:scale-110
           "
           onError={(e) => {
+            // fallback if image URL is broken
             e.currentTarget.src = fallbackImage;
           }}
         />
@@ -73,7 +76,7 @@ const ProductCard = ({ product }) => {
         {/* ADD TO CART */}
         <button
           onClick={(e) => {
-            e.stopPropagation(); // 🔥 IMPORTANT
+            e.stopPropagation();
             addToCart(product);
           }}
           className="
