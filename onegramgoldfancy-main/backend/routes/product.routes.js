@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload"); // multer cloudinary
-const productController = require("../controllers/");
+const productController = require("../controllers/product.controller");
 
 // ADD PRODUCT (single or multiple images)
 router.post(
