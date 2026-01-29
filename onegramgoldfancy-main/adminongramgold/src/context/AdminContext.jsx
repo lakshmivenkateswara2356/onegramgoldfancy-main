@@ -20,7 +20,6 @@ const AdminProvider = ({ children }) => {
      PRODUCTS
   ===================================================== */
   const [products, setProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
 
 const fetchProducts = async () => {
   try {
