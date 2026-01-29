@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-// ---------------- CREATE PRODUCT ----------------
+/* ---------------- CREATE ---------------- */
 exports.createProduct = async (data) => {
   const {
     name,
@@ -23,7 +23,7 @@ exports.createProduct = async (data) => {
       description,
       price,
       stock,
-      images || [], // always store as array
+      images, // ✅ ARRAY
       category,
       old_price,
       discount,
@@ -33,7 +33,7 @@ exports.createProduct = async (data) => {
   return result.rows[0];
 };
 
-// ---------------- GET ALL PRODUCTS ----------------
+/* ---------------- GET ALL ---------------- */
 exports.getAllProducts = async () => {
   const result = await pool.query(
     `SELECT
@@ -46,41 +46,24 @@ exports.getAllProducts = async () => {
       discount,
       stock,
       images,
-      image_url,
       created_at
      FROM products
      ORDER BY id DESC`
   );
 
-  // Ensure every product has an images array (fallback to image_url or empty)
-  return result.rows.map((p) => {
-    let imgs = p.images;
-    if ((!imgs || imgs.length === 0) && p.image_url) {
-      imgs = [p.image_url];
-    } else if (!imgs || imgs.length === 0) {
-      imgs = [];
-    }
-    return { ...p, images: imgs };
-  });
+  return result.rows;
 };
 
-// ---------------- GET SINGLE PRODUCT ----------------
+/* ---------------- GET ONE ---------------- */
 exports.getProductById = async (id) => {
-  const result = await pool.query("SELECT * FROM products WHERE id=$1", [id]);
-  const p = result.rows[0];
-  if (!p) return null;
-
-  let imgs = p.images;
-  if ((!imgs || imgs.length === 0) && p.image_url) {
-    imgs = [p.image_url];
-  } else if (!imgs || imgs.length === 0) {
-    imgs = [];
-  }
-
-  return { ...p, images: imgs };
+  const result = await pool.query(
+    "SELECT * FROM products WHERE id=$1",
+    [id]
+  );
+  return result.rows[0];
 };
 
-// ---------------- UPDATE PRODUCT ----------------
+/* ---------------- UPDATE ---------------- */
 exports.updateProduct = async (id, data) => {
   const {
     name,
@@ -105,13 +88,23 @@ exports.updateProduct = async (id, data) => {
       discount=$8
      WHERE id=$9
      RETURNING *`,
-    [name, description, price, stock, images, category, old_price, discount, id]
+    [
+      name,
+      description,
+      price,
+      stock,
+      images,
+      category,
+      old_price,
+      discount,
+      id,
+    ]
   );
 
   return result.rows[0];
 };
 
-// ---------------- DELETE PRODUCT ----------------
+/* ---------------- DELETE ---------------- */
 exports.deleteProduct = async (id) => {
   await pool.query("DELETE FROM products WHERE id=$1", [id]);
 };
