@@ -18,7 +18,7 @@ const Products = () => {
     price: "",
     oldPrice: "",
     stock: "",
-    imageFiles: [], // array of local files for preview
+    images: [], // Array of selected files
   });
 
   /* ---------------- FETCH PRODUCTS ---------------- */
@@ -44,7 +44,7 @@ const Products = () => {
           discount,
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
-          images: p.images || [p.image_url || "https://via.placeholder.com/120"], // array of image URLs
+          images: p.images || [p.image_url || "https://via.placeholder.com/120"], // support multiple images
         };
       });
 
@@ -64,10 +64,9 @@ const Products = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (name === "imageFiles") {
-      // Allow up to 5 images
-      const selectedFiles = Array.from(files).slice(0, 5);
-      setForm((prev) => ({ ...prev, imageFiles: selectedFiles }));
+    if (name === "images") {
+      const selectedFiles = Array.from(files).slice(0, 5); // max 5 files
+      setForm((prev) => ({ ...prev, images: selectedFiles }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -80,7 +79,7 @@ const Products = () => {
       price: "",
       oldPrice: "",
       stock: "",
-      imageFiles: [],
+      images: [],
     });
     setEditingId(null);
   };
@@ -97,10 +96,7 @@ const Products = () => {
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
 
-      // Append multiple images
-      form.imageFiles.forEach((file, idx) => {
-        formData.append(`images`, file);
-      });
+      form.images.forEach((img) => formData.append("images", img)); // multiple images
 
       if (editingId) {
         await updateProductAPI(editingId, formData);
@@ -124,7 +120,7 @@ const Products = () => {
       price: product.price,
       oldPrice: product.oldPrice || "",
       stock: product.stock,
-      imageFiles: [], // new images can be added
+      images: [], // leave empty, user can upload new images
     });
   };
 
@@ -195,9 +191,11 @@ const Products = () => {
             className="border rounded-lg px-3 py-2"
             required
           />
+
+          {/* MULTIPLE IMAGE UPLOAD */}
           <input
             type="file"
-            name="imageFiles"
+            name="images"
             onChange={handleChange}
             className="border rounded-lg px-3 py-2"
             accept="image/*"
@@ -205,19 +203,17 @@ const Products = () => {
           />
         </div>
 
-        {/* IMAGE PREVIEW */}
-        {form.imageFiles.length > 0 && (
-          <div className="flex gap-2 mt-2">
-            {form.imageFiles.map((file, idx) => (
-              <img
-                key={idx}
-                src={URL.createObjectURL(file)}
-                alt={`preview-${idx}`}
-                className="w-24 h-24 object-cover rounded"
-              />
-            ))}
-          </div>
-        )}
+        {/* IMAGE PREVIEWS */}
+        <div className="flex gap-2 mt-2">
+          {form.images.map((img, index) => (
+            <img
+              key={index}
+              src={URL.createObjectURL(img)}
+              alt={`preview ${index}`}
+              className="w-24 h-24 object-cover rounded border"
+            />
+          ))}
+        </div>
 
         <div className="flex gap-3">
           <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg">
@@ -257,16 +253,11 @@ const Products = () => {
               {products.map((p) => (
                 <tr key={p.id} className="border-t">
                   <td className="px-4 py-3 flex items-center gap-3">
-                    <div className="flex gap-1">
-                      {p.images.map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={img}
-                          alt={p.name}
-                          className="w-12 h-12 rounded border object-cover"
-                        />
-                      ))}
-                    </div>
+                    <img
+                      src={p.images[0]} // show first image in table
+                      alt={p.name}
+                      className="w-14 h-14 rounded border object-cover"
+                    />
                     {p.name}
                   </td>
                   <td className="px-4 py-3">{p.category}</td>
