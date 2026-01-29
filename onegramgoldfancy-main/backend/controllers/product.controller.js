@@ -1,7 +1,7 @@
 const Product = require("../models/product.model");
 const cloudinary = require("../config/cloudinary");
 
-// Helper
+// Helper: calculate discount
 const calculateDiscount = (price, oldPrice) => {
   if (!oldPrice || oldPrice <= price) return 0;
   return Math.round(((oldPrice - price) / oldPrice) * 100);
@@ -15,7 +15,6 @@ exports.addProduct = async (req, res) => {
     let image_urls = [];
 
     if (req.files && req.files.length > 0) {
-      // Upload each file to Cloudinary
       for (const file of req.files) {
         const uploaded = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
@@ -41,7 +40,7 @@ exports.addProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls.length > 0 ? image_urls : null, // can be null for no image
+      images: image_urls.length > 0 ? image_urls : ["https://via.placeholder.com/150"], // fallback if no image
     });
 
     res.status(201).json(product);
@@ -56,7 +55,7 @@ exports.editProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_urls = null;
+    let image_urls = null; // null → keep existing images
 
     if (req.files && req.files.length > 0) {
       image_urls = [];
@@ -85,7 +84,7 @@ exports.editProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls, // if null, keeps existing images
+      images: image_urls, // null → keep existing, array → replace
     });
 
     res.json(product);
@@ -100,13 +99,14 @@ exports.getProducts = async (req, res) => {
   try {
     const products = await Product.getAllProducts();
 
-    // Ensure every product has an images array
-    const formatted = products.map((p) => {
-      return {
-        ...p,
-        images: p.images && p.images.length > 0 ? p.images : ["https://via.placeholder.com/150"],
-      };
-    });
+    // ensure images array exists
+    const formatted = products.map((p) => ({
+      ...p,
+      images:
+        p.images && p.images.length > 0
+          ? p.images
+          : ["https://via.placeholder.com/150"],
+    }));
 
     res.json(formatted);
   } catch (err) {
@@ -119,7 +119,6 @@ exports.getSingleProduct = async (req, res) => {
   try {
     const product = await Product.getProductById(req.params.id);
 
-    // Ensure images array exists
     if (!product.images || product.images.length === 0) {
       product.images = ["https://via.placeholder.com/150"];
     }
