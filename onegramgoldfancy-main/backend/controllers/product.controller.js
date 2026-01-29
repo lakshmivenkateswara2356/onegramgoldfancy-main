@@ -16,7 +16,7 @@ exports.addProduct = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const uploaded = await new Promise((resolve, reject) => {
+        const uploadResult = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             { folder: "products" },
             (error, result) => {
@@ -26,70 +26,84 @@ exports.addProduct = async (req, res) => {
           );
           stream.end(file.buffer);
         });
-        image_urls.push(uploaded.secure_url);
+
+        image_urls.push(uploadResult.secure_url);
       }
     }
 
-    const discount = calculateDiscount(Number(price), Number(old_price));
+    const discount =
+      old_price && old_price > price
+        ? Math.round(((old_price - price) / old_price) * 100)
+        : 0;
 
     const product = await Product.createProduct({
       name,
-      description,
+      category,
       price,
       stock,
-      category,
       old_price,
+      description,
+      images: image_urls, // ✅ array
       discount,
-      images: image_urls.length > 0 ? image_urls : ["https://via.placeholder.com/150"], // fallback if no image
     });
 
     res.status(201).json(product);
   } catch (err) {
-    console.error("ADD PRODUCT ERROR:", err);
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
+
 
 /* ---------------- UPDATE PRODUCT ---------------- */
 exports.editProduct = async (req, res) => {
   try {
     const { name, category, price, stock, old_price, description } = req.body;
 
-    let image_urls = null; // null → keep existing images
+    let image_url;
 
-    if (req.files && req.files.length > 0) {
-      image_urls = [];
-      for (const file of req.files) {
-        const uploaded = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "products" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(file.buffer);
-        });
-        image_urls.push(uploaded.secure_url);
-      }
+    if (req.file) {
+      const result = await cloudinary.uploader.upload_stream(
+        { folder: "products" },
+        async (error, result) => {
+          if (error) return res.status(500).json({ error: error.message });
+          image_url = result.secure_url;
+
+          const discount = calculateDiscount(Number(price), Number(old_price));
+
+          const product = await Product.updateProduct(req.params.id, {
+            name,
+            category,
+            price,
+            stock,
+            old_price,
+            description,
+            discount,
+            image_url,
+          });
+
+          res.json(product);
+        }
+      );
+      result.end(req.file.buffer);
+      return;
     }
 
+    // Update without changing image
     const discount = calculateDiscount(Number(price), Number(old_price));
 
     const product = await Product.updateProduct(req.params.id, {
       name,
-      description,
+      category,
       price,
       stock,
-      category,
       old_price,
+      description,
       discount,
-      images: image_urls, // null → keep existing, array → replace
     });
 
     res.json(product);
   } catch (err) {
-    console.error("UPDATE PRODUCT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -98,17 +112,7 @@ exports.editProduct = async (req, res) => {
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.getAllProducts();
-
-    // ensure images array exists
-    const formatted = products.map((p) => ({
-      ...p,
-      images:
-        p.images && p.images.length > 0
-          ? p.images
-          : ["https://via.placeholder.com/150"],
-    }));
-
-    res.json(formatted);
+    res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -118,11 +122,6 @@ exports.getProducts = async (req, res) => {
 exports.getSingleProduct = async (req, res) => {
   try {
     const product = await Product.getProductById(req.params.id);
-
-    if (!product.images || product.images.length === 0) {
-      product.images = ["https://via.placeholder.com/150"];
-    }
-
     res.json(product);
   } catch (err) {
     res.status(500).json({ error: err.message });
