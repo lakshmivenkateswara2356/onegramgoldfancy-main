@@ -18,7 +18,7 @@ const Products = () => {
     price: "",
     oldPrice: "",
     stock: "",
-    images: [], // Array of selected files
+    images: [null, null, null, null, null], // 5 separate image slots
   });
 
   /* ---------------- FETCH PRODUCTS ---------------- */
@@ -44,7 +44,7 @@ const Products = () => {
           discount,
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
-          images: p.images || [p.image_url || "https://via.placeholder.com/120"], // support multiple images
+          images: p.images || [p.image_url || "https://via.placeholder.com/120"],
         };
       });
 
@@ -61,12 +61,14 @@ const Products = () => {
   }, []);
 
   /* ---------------- FORM HANDLERS ---------------- */
-  const handleChange = (e) => {
+  const handleChange = (e, index = null) => {
     const { name, value, files } = e.target;
 
-    if (name === "images") {
-      const selectedFiles = Array.from(files).slice(0, 5); // max 5 files
-      setForm((prev) => ({ ...prev, images: selectedFiles }));
+    if (name === "image") {
+      // Update the specific image slot
+      const newImages = [...form.images];
+      newImages[index] = files[0] || null;
+      setForm((prev) => ({ ...prev, images: newImages }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -79,7 +81,7 @@ const Products = () => {
       price: "",
       oldPrice: "",
       stock: "",
-      images: [],
+      images: [null, null, null, null, null],
     });
     setEditingId(null);
   };
@@ -96,7 +98,10 @@ const Products = () => {
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
 
-      form.images.forEach((img) => formData.append("images", img)); // multiple images
+      // Append all images that are selected
+      form.images.forEach((img) => {
+        if (img) formData.append("images", img);
+      });
 
       if (editingId) {
         await updateProductAPI(editingId, formData);
@@ -114,13 +119,15 @@ const Products = () => {
   /* ---------------- EDIT / DELETE ---------------- */
   const handleEdit = (product) => {
     setEditingId(product.id);
+
+    // Fill existing data but leave images empty (admin can upload new ones)
     setForm({
       name: product.name,
       category: product.category,
       price: product.price,
       oldPrice: product.oldPrice || "",
       stock: product.stock,
-      images: [], // leave empty, user can upload new images
+      images: [null, null, null, null, null],
     });
   };
 
@@ -192,27 +199,32 @@ const Products = () => {
             required
           />
 
-          {/* MULTIPLE IMAGE UPLOAD */}
-          <input
-            type="file"
-            name="images"
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2"
-            accept="image/*"
-            multiple
-          />
+          {/* 5 IMAGE UPLOAD INPUTS */}
+          {form.images.map((img, index) => (
+            <input
+              key={index}
+              type="file"
+              name="image"
+              onChange={(e) => handleChange(e, index)}
+              className="border rounded-lg px-3 py-2"
+              accept="image/*"
+            />
+          ))}
         </div>
 
         {/* IMAGE PREVIEWS */}
         <div className="flex gap-2 mt-2">
-          {form.images.map((img, index) => (
-            <img
-              key={index}
-              src={URL.createObjectURL(img)}
-              alt={`preview ${index}`}
-              className="w-24 h-24 object-cover rounded border"
-            />
-          ))}
+          {form.images.map(
+            (img, index) =>
+              img && (
+                <img
+                  key={index}
+                  src={URL.createObjectURL(img)}
+                  alt={`preview ${index}`}
+                  className="w-24 h-24 object-cover rounded border"
+                />
+              )
+          )}
         </div>
 
         <div className="flex gap-3">
