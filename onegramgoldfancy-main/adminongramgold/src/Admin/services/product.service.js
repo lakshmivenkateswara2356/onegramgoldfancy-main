@@ -4,7 +4,7 @@ const API_BASE_URL = "https://onegramgoldfancy-main.onrender.com/api/products";
 
 // GET ALL PRODUCTS
 export const getAllProducts = async () => {
-  const res = await axios.get(API_BASE_URL);
+  const res = await axios.get(`${API_BASE_URL}/`);
   return res.data;
 };
 
@@ -16,8 +16,8 @@ export const getProductById = async (id) => {
 
 // ADD PRODUCT
 export const addProductAPI = async (formData) => {
-  const res = await axios.post(API_BASE_URL, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const res = await axios.post(`${API_BASE_URL}/add`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }, // required for files
   });
   return res.data;
 };
