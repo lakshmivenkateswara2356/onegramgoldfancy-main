@@ -1,26 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload"); // multer cloudinary
+const upload = require("../middlewares/upload"); // Multer instance
 const productController = require("../controllers/product.controller");
 
-// ADD PRODUCT (single or multiple images)
-router.post(
-  "/add",
-  upload.array("images", 5), // ✅ VERY IMPORTANT
-  productController.addProduct
-);
+// Add product with multiple images
+router.post("/products", upload.array("images", 5), productController.addProduct);
 
-// GET ALL PRODUCTS
-router.get("/", productController.getAllProducts);
+// Update product
+router.put("/products/:id", upload.array("images", 5), productController.editProduct);
 
-// UPDATE PRODUCT
-router.put(
-  "/:id",
-  upload.array("images", 5), // ✅ VERY IMPORTANT
-  productController.updateProduct
-);
+// Get all products
+router.get("/products", productController.getProducts);
 
-// DELETE PRODUCT
-router.delete("/:id", productController.deleteProduct);
+// Get single product
+router.get("/products/:id", productController.getSingleProduct);
+
+// Delete product
+router.delete("/products/:id", productController.removeProduct);
 
 module.exports = router;
