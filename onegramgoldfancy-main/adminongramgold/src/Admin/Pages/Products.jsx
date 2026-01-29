@@ -12,13 +12,14 @@ const Products = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Form with 5 images slots
   const initialForm = {
     name: "",
     category: "",
     price: "",
     oldPrice: "",
     stock: "",
-    images: [null, null, null, null, null], // store 5 files
+    images: [null, null, null, null, null], // 5 image files
   };
 
   const [form, setForm] = useState(initialForm);
@@ -46,7 +47,10 @@ const Products = () => {
           discount,
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
-          images: p.images?.length ? p.images : [p.image_url || "https://via.placeholder.com/120"],
+          images:
+            p.images?.length > 0
+              ? p.images
+              : [p.image_url || "https://via.placeholder.com/120"],
         };
       });
 
@@ -83,6 +87,7 @@ const Products = () => {
   /* ---------------- ADD / UPDATE ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const formData = new FormData();
       formData.append("name", form.name);
@@ -91,8 +96,9 @@ const Products = () => {
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
 
+      // Append images (only selected ones)
       form.images.forEach((img) => {
-        if (img) formData.append("images", img); // key must match backend
+        if (img) formData.append("images", img);
       });
 
       if (editingId) {
@@ -105,6 +111,7 @@ const Products = () => {
       fetchProducts();
     } catch (err) {
       console.error("Save product failed", err);
+      alert("Failed to save product. Make sure backend is configured for Cloudinary.");
     }
   };
 
@@ -259,7 +266,7 @@ const Products = () => {
                 <tr key={p.id} className="border-t">
                   <td className="px-4 py-3 flex items-center gap-3">
                     <img
-                      src={p.images?.[0] || p.image}
+                      src={p.images?.[0] || "https://via.placeholder.com/120"}
                       alt={p.name}
                       className="w-14 h-14 rounded border object-cover"
                     />
