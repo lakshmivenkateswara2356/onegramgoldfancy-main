@@ -12,14 +12,16 @@ const Products = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState({
+  const initialForm = {
     name: "",
     category: "",
     price: "",
     oldPrice: "",
     stock: "",
-    images: [null, null, null, null, null], // 5 separate image slots
-  });
+    images: [null, null, null, null, null], // store 5 files
+  };
+
+  const [form, setForm] = useState(initialForm);
 
   /* ---------------- FETCH PRODUCTS ---------------- */
   const fetchProducts = async () => {
@@ -44,7 +46,7 @@ const Products = () => {
           discount,
           stock: Number(p.stock) || 0,
           status: Number(p.stock) > 0 ? "Active" : "Inactive",
-          images: p.images || [p.image_url || "https://via.placeholder.com/120"],
+          images: p.images?.length ? p.images : [p.image_url || "https://via.placeholder.com/120"],
         };
       });
 
@@ -64,8 +66,7 @@ const Products = () => {
   const handleChange = (e, index = null) => {
     const { name, value, files } = e.target;
 
-    if (name === "image") {
-      // Update the specific image slot
+    if (name === "images" && index !== null) {
       const newImages = [...form.images];
       newImages[index] = files[0] || null;
       setForm((prev) => ({ ...prev, images: newImages }));
@@ -75,21 +76,13 @@ const Products = () => {
   };
 
   const resetForm = () => {
-    setForm({
-      name: "",
-      category: "",
-      price: "",
-      oldPrice: "",
-      stock: "",
-      images: [null, null, null, null, null],
-    });
+    setForm(initialForm);
     setEditingId(null);
   };
 
   /* ---------------- ADD / UPDATE ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const formData = new FormData();
       formData.append("name", form.name);
@@ -98,9 +91,8 @@ const Products = () => {
       formData.append("old_price", form.oldPrice || "");
       formData.append("stock", form.stock);
 
-      // Append all images that are selected
       form.images.forEach((img) => {
-        if (img) formData.append("images", img);
+        if (img) formData.append("images", img); // key must match backend
       });
 
       if (editingId) {
@@ -119,15 +111,17 @@ const Products = () => {
   /* ---------------- EDIT / DELETE ---------------- */
   const handleEdit = (product) => {
     setEditingId(product.id);
-
-    // Fill existing data but leave images empty (admin can upload new ones)
+    const imagesArray = [null, null, null, null, null];
+    if (product.images && product.images.length) {
+      product.images.forEach((img, i) => (imagesArray[i] = img));
+    }
     setForm({
       name: product.name,
       category: product.category,
       price: product.price,
       oldPrice: product.oldPrice || "",
       stock: product.stock,
-      images: [null, null, null, null, null],
+      images: imagesArray,
     });
   };
 
@@ -199,12 +193,12 @@ const Products = () => {
             required
           />
 
-          {/* 5 IMAGE UPLOAD INPUTS */}
+          {/* 5 IMAGE INPUTS */}
           {form.images.map((img, index) => (
             <input
               key={index}
               type="file"
-              name="image"
+              name="images"
               onChange={(e) => handleChange(e, index)}
               className="border rounded-lg px-3 py-2"
               accept="image/*"
@@ -212,18 +206,17 @@ const Products = () => {
           ))}
         </div>
 
-        {/* IMAGE PREVIEWS */}
+        {/* IMAGE PREVIEW */}
         <div className="flex gap-2 mt-2">
-          {form.images.map(
-            (img, index) =>
-              img && (
-                <img
-                  key={index}
-                  src={URL.createObjectURL(img)}
-                  alt={`preview ${index}`}
-                  className="w-24 h-24 object-cover rounded border"
-                />
-              )
+          {form.images.map((img, i) =>
+            img ? (
+              <img
+                key={i}
+                src={typeof img === "string" ? img : URL.createObjectURL(img)}
+                alt="preview"
+                className="w-24 h-24 object-cover rounded"
+              />
+            ) : null
           )}
         </div>
 
@@ -266,7 +259,7 @@ const Products = () => {
                 <tr key={p.id} className="border-t">
                   <td className="px-4 py-3 flex items-center gap-3">
                     <img
-                      src={p.images[0]} // show first image in table
+                      src={p.images?.[0] || p.image}
                       alt={p.name}
                       className="w-14 h-14 rounded border object-cover"
                     />
