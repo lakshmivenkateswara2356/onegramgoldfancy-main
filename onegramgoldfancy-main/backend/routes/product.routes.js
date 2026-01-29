@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/product.controller");
-const upload = require("../middleware/uploads"); // ✅ USE THIS ONLY
+const upload = require("../middleware/upload"); // ✅ USE THIS ONLY
 
 router.get("/", productController.getProducts);
 router.get("/:id", productController.getSingleProduct);
