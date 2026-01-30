@@ -9,6 +9,9 @@ const calculateDiscount = (price, oldPrice) => {
 /* ---------------- ADD PRODUCT ---------------- */
 exports.addProduct = async (req, res) => {
   try {
+console.log("FILES:", req.files);
+console.log("BODY:", req.body);
+
     let { name, category, price, stock, old_price, description } = req.body;
 
     // ✅ normalize values
