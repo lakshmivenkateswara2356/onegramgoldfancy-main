@@ -6,7 +6,7 @@ import {
   User,
   Heart,
   ShoppingBag,
-  LogOut,
+  
 } from "lucide-react";
 import Footernavigations from "../../Footernavigations";
 
