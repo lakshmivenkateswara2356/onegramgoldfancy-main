@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  User,
+  Heart,
+  ShoppingBag,
+  LogOut,
+} from "lucide-react";
 import Footernavigations from "../../Footernavigations";
 
 const Account = () => {
@@ -8,79 +16,105 @@ const Account = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-[22px] px-4">
+    <div className="min-h-screen bg-black text-white px-4 pt-6">
+
+      {/* Back */}
       <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-[#B08A2E] hover:text-[#C9A24D] transition mb-4"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="text-xs font-medium">Back</span>
-        </button>
-      <div className="max-w-md mx-auto bg-black/60 border border-yellow-500/30 rounded-2xl p-6 space-y-6">
-        <h1 className="text-2xl font-bold text-yellow-400 text-center">
-          My Account
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-[#C9A24D] hover:text-[#E6C873] transition mb-6"
+      >
+        <ArrowLeft size={18} />
+        <span className="text-sm tracking-wide">Back</span>
+      </button>
+
+      {/* Main Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-md mx-auto bg-[#0C0C0C] border border-[#2A2A2A] rounded-3xl p-7 shadow-2xl"
+      >
+        <h1 className="text-xl font-semibold text-center tracking-wide text-[#E6C873]">
+          Account
         </h1>
 
         {user ? (
           <>
-            <div className="text-center">
-              <p className="text-lg font-semibold">{user.name}</p>
-              <p className="text-sm text-gray-400">{user.phone}</p>
+            {/* Profile */}
+            <div className="flex flex-col items-center mt-8">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#E6C873] to-[#B08A2E] flex items-center justify-center shadow-lg">
+                <User size={38} className="text-black" />
+              </div>
+
+              <p className="mt-4 text-lg font-medium">
+                {user.name}
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                {user.phone}
+              </p>
             </div>
 
-            <button
-              onClick={() => navigate("/favorites")}
-              className="w-full py-3 border border-yellow-500/30 rounded-xl text-yellow-400"
-            >
-              My Favorites
-            </button>
+            {/* Actions */}
+            <div className="mt-10 space-y-4">
 
-            <button
-              onClick={() => navigate("/orders")}
-              className="w-full py-3 border border-yellow-500/30 rounded-xl text-yellow-400"
-            >
-              Order History
-            </button>
+              <ActionItem
+                icon={<Heart size={18} />}
+                label="Favorites"
+                onClick={() => navigate("/favorites")}
+              />
 
-            <button
-              onClick={handleLogout}
-              className="w-full py-3 bg-red-500 rounded-xl font-semibold"
-            >
-              Logout
-            </button>
+              <ActionItem
+                icon={<ShoppingBag size={18} />}
+                label="Orders"
+                onClick={() => navigate("/orders")}
+              />
+
+              <button
+                onClick={handleLogout}
+                className="w-full mt-6 py-3 rounded-xl bg-[#1A1A1A] text-red-400 hover:bg-red-500 hover:text-white transition font-medium"
+              >
+                Logout
+              </button>
+            </div>
           </>
         ) : (
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-3 bg-yellow-500 rounded-xl font-semibold"
+            className="w-full mt-10 py-3 rounded-xl bg-gradient-to-r from-[#E6C873] to-[#B08A2E] text-black font-semibold"
           >
             Login / Register
           </button>
         )}
-      </div>
-      <Footernavigations/>
+      </motion.div>
+
+      <Footernavigations />
     </div>
   );
 };
+
+/* Clean Professional Action Row */
+const ActionItem = ({ icon, label, onClick }) => (
+  <motion.div
+    whileHover={{ x: 4 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className="cursor-pointer flex items-center justify-between p-4 rounded-xl bg-[#121212] border border-[#2A2A2A] hover:border-[#E6C873]/60 transition"
+  >
+    <div className="flex items-center gap-3 text-[#E6C873]">
+      {icon}
+      <span className="font-medium tracking-wide">{label}</span>
+    </div>
+    <span className="text-gray-500 text-sm">›</span>
+  </motion.div>
+);
 
 export default Account;

@@ -47,7 +47,7 @@ const Orders = () => {
         </div>
       )}
 
-      {/* EMPTY */}
+      {/* EMPTY STATE */}
       {!loading && orders.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-sm">
           <span className="text-4xl mb-3">📦</span>
@@ -60,14 +60,14 @@ const Orders = () => {
         </div>
       )}
 
-      {/* ORDERS */}
+      {/* ORDERS LIST */}
       <div className="space-y-6">
         {orders.map((order) => (
           <div
             key={order.id}
             className="bg-white rounded-2xl border shadow-sm p-5"
           >
-            {/* TOP */}
+            {/* ORDER HEADER */}
             <div className="flex justify-between items-center mb-4">
               <div>
                 <p className="text-xs text-gray-500">Order ID</p>
@@ -90,17 +90,46 @@ const Orders = () => {
 
             {/* PRODUCTS */}
             <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-1">Products</p>
-              <ul className="text-sm text-gray-800 space-y-1">
-                {order.items?.map((item, index) => (
-                  <li key={index}>
-                    • {item.name} × {item.quantity}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-xs text-gray-500 mb-2">Products</p>
+
+              <div className="space-y-3">
+                {order.items?.map((item, index) => {
+                  const productName =
+                    item.name || item.product?.name || "Product";
+
+                  const productImage =
+                    item.image ||
+                    item.product?.image ||
+                    "https://via.placeholder.com/80";
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-4 p-3 border rounded-xl bg-[#fafafa]"
+                    >
+                      {/* PRODUCT IMAGE */}
+                      <img
+                        src={productImage}
+                        alt={productName}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+
+                      {/* PRODUCT DETAILS */}
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">
+                          {productName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Quantity: {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* DETAILS */}
+            {/* ORDER DETAILS */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-gray-500 text-xs">Total Amount</p>
@@ -147,7 +176,7 @@ const Orders = () => {
                     href={`https://www.${order.courier_name}.com/track/${order.tracking_id}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs px-4 py-2 rounded-full border border-[#C9A24D] text-[#C9A24D] hover:bg-[#FAF3E0]"
+                    className="text-xs px-4 py-2 rounded-full border border-[#C9A24D] text-[#C9A24D] hover:bg-[#FAF3E0] transition"
                   >
                     Track Order
                   </a>

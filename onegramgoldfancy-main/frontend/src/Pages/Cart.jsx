@@ -5,13 +5,11 @@ import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } =
     useContext(AppContext);
 
   const navigate = useNavigate();
-
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -21,12 +19,9 @@ const Cart = () => {
     address: "",
   });
 
-  /* ---------------- LOAD SAVED ADDRESS ---------------- */
   useEffect(() => {
     const saved = localStorage.getItem("deliveryAddress");
-    if (saved) {
-      setGuest(JSON.parse(saved));
-    }
+    if (saved) setGuest(JSON.parse(saved));
   }, []);
 
   const subtotal = cart.reduce(
@@ -34,52 +29,34 @@ const Cart = () => {
     0
   );
 
-  /* ---------------- CONFIRM ORDER ---------------- */
   const confirmOrder = async () => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("Please login to place order");
-      return;
-    }
-
-    if (!guest.name || !guest.phone || !guest.address) {
-      alert("Please fill delivery details");
-      return;
-    }
-
-    if (cart.length === 0) {
-      alert("Your cart is empty");
-      return;
-    }
-    
+    if (!token) return alert("Please login to place order");
+    if (!guest.name || !guest.phone || !guest.address)
+      return alert("Please fill delivery details");
+    if (cart.length === 0) return alert("Your cart is empty");
 
     setLoading(true);
-
-    // ✅ Save address permanently
     localStorage.setItem("deliveryAddress", JSON.stringify(guest));
 
-    const orderPayload = {
-      grams: cart.reduce((sum, item) => sum + item.quantity, 0),
-      total_amount: subtotal,
-      customer_name: guest.name,
-      phone: guest.phone,
-      address: guest.address,
-    };
-
     try {
-      await axios.post("https://onegramgoldfancy-main.onrender.com/api/orders", orderPayload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.post(
+        "https://onegramgoldfancy-main.onrender.com/api/orders",
+        {
+          grams: cart.reduce((sum, item) => sum + item.quantity, 0),
+          total_amount: subtotal,
+          customer_name: guest.name,
+          phone: guest.phone,
+          address: guest.address,
         },
-      });
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       clearCart();
-
-      // ✅ PREMIUM FLOW
       navigate("/order-success");
     } catch (err) {
-      console.error(err);
       alert("Order failed");
     } finally {
       setLoading(false);
@@ -87,94 +64,88 @@ const Cart = () => {
   };
 
   return (
-    <div className="bg-[#fafafa] min-h-screen">
+    <div className="bg-[#FAFAFA] min-h-screen">
       <Navbar />
 
-      <div className="pt-20 px-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-10">
-        {/* ---------------- CART ITEMS ---------------- */}
-        <div className="flex-1">
-          <h1 className="text-3xl font-medium mb-6">
-            Shopping Cart{" "}
-            <span className="text-sm text-indigo-500">
-              {cart.length} Items
+      <div className="pt-24 px-5 max-w-7xl mx-auto grid md:grid-cols-[2fr_1fr] gap-10">
+
+        {/* CART ITEMS */}
+        <div>
+          <h1 className="text-2xl font-semibold mb-6">
+            Shopping Cart
+            <span className="ml-2 text-sm text-gray-500">
+              ({cart.length} items)
             </span>
           </h1>
 
           {cart.length === 0 ? (
-            <p className="text-gray-500">Your cart is empty</p>
+            <div className="bg-white rounded-xl p-10 text-center shadow-sm">
+              <p className="text-gray-500">Your cart is empty</p>
+            </div>
           ) : (
-            <>
-              <div className="grid grid-cols-[2fr_1fr_1fr] text-gray-500 font-medium pb-3">
-                <p>Product Details</p>
-                <p className="text-center">Subtotal</p>
-                <p className="text-center">Action</p>
-              </div>
-
+            <div className="space-y-6">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[2fr_1fr_1fr] items-center pt-4"
+                  className="bg-white rounded-xl p-5 shadow-sm flex gap-5"
                 >
-                  <div className="flex gap-4">
-                    <img
-                      src={item.image}
-                      className="w-24 h-24 object-cover border rounded"
-                      alt={item.name}
-                    />
-                    <div>
-                      <p className="font-semibold">{item.name}</p>
-                      <div className="text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          Qty:
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              updateQuantity(
-                                item.id,
-                                Math.max(1, +e.target.value)
-                              )
-                            }
-                            className="w-14 border px-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-28 h-28 object-cover rounded-lg border"
+                  />
 
-                  <p className="text-center font-medium">
-                    ₹{item.price * item.quantity}
-                  </p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{item.name}</h3>
+
+                    <div className="flex items-center gap-3 mt-2 text-sm">
+                      <span className="text-gray-500">Quantity</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateQuantity(item.id, Math.max(1, +e.target.value))
+                        }
+                        className="w-16 border rounded-md px-2 py-1"
+                      />
+                    </div>
+
+                    <p className="mt-3 font-semibold text-[#B08A2E]">
+                      ₹{item.price * item.quantity}
+                    </p>
+                  </div>
 
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="mx-auto text-red-500"
+                    className="text-gray-400 hover:text-red-500 transition"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
 
-        {/* ---------------- ORDER SUMMARY ---------------- */}
-        <div className="max-w-[360px] w-full bg-gray-100/40 p-5 border">
-          <h2 className="text-xl font-medium">Order Summary</h2>
-          <hr className="my-4" />
+        {/* ORDER SUMMARY */}
+        <div className="bg-white rounded-2xl p-6 shadow-md h-fit">
+          <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-          <p className="text-sm font-medium uppercase">Delivery Address</p>
+          {/* Address */}
+          <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+            Delivery Address
+          </p>
 
           {!guest.address || isEditingAddress ? (
-            <div className="space-y-2 mt-2">
+            <div className="space-y-3">
               <input
-                placeholder="Name"
+                placeholder="Full Name"
                 value={guest.name}
                 onChange={(e) =>
                   setGuest({ ...guest, name: e.target.value })
                 }
-                className="w-full border px-3 py-2"
+                className="w-full border rounded-lg px-3 py-2"
               />
               <input
                 placeholder="WhatsApp Number"
@@ -182,7 +153,7 @@ const Cart = () => {
                 onChange={(e) =>
                   setGuest({ ...guest, phone: e.target.value })
                 }
-                className="w-full border px-3 py-2"
+                className="w-full border rounded-lg px-3 py-2"
               />
               <textarea
                 placeholder="Full Address"
@@ -190,20 +161,18 @@ const Cart = () => {
                 onChange={(e) =>
                   setGuest({ ...guest, address: e.target.value })
                 }
-                className="w-full border px-3 py-2"
+                className="w-full border rounded-lg px-3 py-2"
               />
-              {guest.address && (
-                <button
-                  onClick={() => setIsEditingAddress(false)}
-                  className="text-indigo-500 text-sm"
-                >
-                  Save Address
-                </button>
-              )}
+              <button
+                onClick={() => setIsEditingAddress(false)}
+                className="text-sm text-indigo-500"
+              >
+                Save Address
+              </button>
             </div>
           ) : (
-            <div className="mt-2">
-              <p className="text-gray-600">{guest.address}</p>
+            <div className="text-sm text-gray-600">
+              <p>{guest.address}</p>
               <button
                 onClick={() => setIsEditingAddress(true)}
                 className="text-indigo-500 text-sm mt-1"
@@ -213,25 +182,28 @@ const Cart = () => {
             </div>
           )}
 
-          <hr className="my-4" />
+          <hr className="my-5" />
 
-          <p className="flex justify-between text-gray-700">
+          <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span className="font-semibold">₹{subtotal}</span>
-          </p>
+            <span className="text-[#B08A2E]">₹{subtotal}</span>
+          </div>
 
           <button
             onClick={confirmOrder}
             disabled={loading}
-            className={`w-full py-3 mt-6 text-white transition
-              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-500 hover:bg-indigo-600"}
+            className={`w-full mt-6 py-3 rounded-xl text-white font-medium transition
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] hover:opacity-90"
+              }
             `}
           >
             {loading ? "Placing Order..." : "Place Order"}
           </button>
         </div>
       </div>
-      
     </div>
   );
 };

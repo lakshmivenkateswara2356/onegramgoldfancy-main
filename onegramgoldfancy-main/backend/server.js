@@ -8,6 +8,7 @@ const pool = require("./config/db");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
+const wishlistRoutes = require("./routes/wishlist.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
 const productRoutes = require("./routes/product.routes");
@@ -42,6 +43,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/banners", bannerRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 // -------------------- ROOT --------------------
 app.get("/", (req, res) => {
