@@ -1,5 +1,4 @@
 const Product = require("../models/product.model");
-const cloudinary = require("../config/cloudinary");
 
 // Helper
 const calculateDiscount = (price, oldPrice) => {
@@ -10,16 +9,22 @@ const calculateDiscount = (price, oldPrice) => {
 /* ---------------- ADD PRODUCT ---------------- */
 exports.addProduct = async (req, res) => {
   try {
-    const { name, category, price, stock, old_price, description } = req.body;
+    let { name, category, price, stock, old_price, description } = req.body;
+
+    // ✅ normalize values
+    price = Number(price);
+    stock = Number(stock || 0);
+    old_price = old_price ? Number(old_price) : null;
+    description = description || "";
 
     let image_urls = [];
 
+    // ✅ Cloudinary (multer-storage-cloudinary)
     if (req.files && req.files.length > 0) {
-      // Using multer-cloudinary: URLs already uploaded
-      image_urls = req.files.map((file) => file.path); 
+      image_urls = req.files.map((file) => file.path);
     }
 
-    const discount = calculateDiscount(Number(price), Number(old_price));
+    const discount = calculateDiscount(price, old_price);
 
     const product = await Product.createProduct({
       name,
@@ -29,7 +34,7 @@ exports.addProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls.length > 0 ? image_urls : null, // null for no image
+      images: image_urls, // ✅ ALWAYS ARRAY
     });
 
     res.status(201).json(product);
@@ -42,7 +47,12 @@ exports.addProduct = async (req, res) => {
 /* ---------------- UPDATE PRODUCT ---------------- */
 exports.editProduct = async (req, res) => {
   try {
-    const { name, category, price, stock, old_price, description } = req.body;
+    let { name, category, price, stock, old_price, description } = req.body;
+
+    price = Number(price);
+    stock = Number(stock || 0);
+    old_price = old_price ? Number(old_price) : null;
+    description = description || "";
 
     let image_urls = null;
 
@@ -50,7 +60,7 @@ exports.editProduct = async (req, res) => {
       image_urls = req.files.map((file) => file.path);
     }
 
-    const discount = calculateDiscount(Number(price), Number(old_price));
+    const discount = calculateDiscount(price, old_price);
 
     const product = await Product.updateProduct(req.params.id, {
       name,
@@ -60,7 +70,7 @@ exports.editProduct = async (req, res) => {
       category,
       old_price,
       discount,
-      images: image_urls, // null keeps existing images
+      images: image_urls, // null → keeps old images
     });
 
     res.json(product);
@@ -77,7 +87,10 @@ exports.getProducts = async (req, res) => {
 
     const formatted = products.map((p) => ({
       ...p,
-      images: p.images && p.images.length > 0 ? p.images : ["https://via.placeholder.com/150"],
+      images:
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images
+          : ["https://via.placeholder.com/150"],
     }));
 
     res.json(formatted);

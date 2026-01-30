@@ -20,10 +20,10 @@ exports.createProduct = async (data) => {
      RETURNING *`,
     [
       name,
-      description,
+      description || "",
       price,
       stock,
-      images, // ✅ ARRAY
+      images || [], // ✅ NEVER null
       category,
       old_price,
       discount,
@@ -90,10 +90,10 @@ exports.updateProduct = async (id, data) => {
      RETURNING *`,
     [
       name,
-      description,
+      description || "",
       price,
       stock,
-      images,
+      images, // null allowed here
       category,
       old_price,
       discount,
