@@ -14,7 +14,8 @@ const API_URL = "https://onegramgoldfancy-main.onrender.com/api";
 ===================================================== */
 const AdminProvider = ({ children }) => {
   /* ================= TOKEN ================= */
-  const getToken = () => localStorage.getItem("token");
+  // ✅ FIX: use correct admin token key
+  const getToken = () => localStorage.getItem("adminToken");
 
   /* =====================================================
      PRODUCTS
@@ -73,14 +74,17 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS
+     ORDERS  ✅ FIXED
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      console.warn("Admin token missing");
+      return;
+    }
 
     try {
       setLoadingOrders(true);
@@ -90,10 +94,15 @@ const AdminProvider = ({ children }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) return;
+      if (!res.ok) {
+        console.error("Fetch orders failed:", data);
+        return;
+      }
 
-      const ordersArray = Array.isArray(data) ? data : data.orders || [];
+      // ✅ Backend returns ARRAY directly
+      const ordersArray = Array.isArray(data) ? data : [];
 
+      // ✅ FIELD NAMES MATCH BACKEND
       const formatted = ordersArray.map((o) => ({
         id: o.id,
         customer: o.customer_name || "Guest",
@@ -102,9 +111,9 @@ const AdminProvider = ({ children }) => {
         grams: o.grams || 0,
         total: o.total_amount || 0,
         status: o.status?.toLowerCase() || "pending",
-        createdAt: o.created_at || new Date().toISOString(),
-        trackingId: o.tracking_id || "",
-        courierName: o.courier_name || "",
+        createdAt: o.created_at,
+        tracking_id: o.tracking_id || "",
+        courier_name: o.courier_name || "",
       }));
 
       setOrders(formatted);
@@ -130,16 +139,19 @@ const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
+        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
+        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
+        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,
