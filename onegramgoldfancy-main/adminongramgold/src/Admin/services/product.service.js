@@ -16,7 +16,7 @@ export const getProductById = async (id) => {
 
 // ADD PRODUCT
 export const addProductAPI = async (formData) => {
-  const res = await axios.post(API_BASE_URL, formData, {
+  const res = await axios.post(`${API_BASE_URL}/add`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
