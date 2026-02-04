@@ -37,8 +37,8 @@ const AdminProvider = ({ children }) => {
 
       const formatted = data.map((p) => ({
         ...p,
+        id: p.id || p._id,
 
-        /* ✅ CLOUDINARY SAFE IMAGE */
         image:
           Array.isArray(p.images) &&
           p.images.length > 0 &&
@@ -86,7 +86,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS
+     ORDERS (✅ FIXED PRODUCT NAME & IMAGE)
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -103,15 +103,12 @@ const AdminProvider = ({ children }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        console.error("Fetch orders failed:", data);
-        return;
-      }
+      if (!res.ok) return;
 
       const ordersArray = Array.isArray(data) ? data : [];
 
       const formatted = ordersArray.map((o) => ({
-        id: o.id,
+        id: o.id || o._id,
         customer: o.customer_name || "Guest",
         phone: o.phone || "-",
         address: o.address || "-",
@@ -122,18 +119,26 @@ const AdminProvider = ({ children }) => {
         tracking_id: o.tracking_id || "",
         courier_name: o.courier_name || "",
 
-        /* ✅ FIXED PRODUCT MERGE */
         items: Array.isArray(o.items)
           ? o.items.map((item) => {
-              const product = products.find(
-                (p) => String(p.id) === String(item.product_id)
+              /* ✅ 1. USE POPULATED PRODUCT IF EXISTS */
+              const populatedProduct = item.product;
+
+              /* ✅ 2. FALLBACK TO PRODUCTS LIST */
+              const fallbackProduct = products.find(
+                (p) =>
+                  String(p.id) === String(item.product_id) ||
+                  String(p._id) === String(item.product_id)
               );
+
+              const finalProduct = populatedProduct || fallbackProduct;
 
               return {
                 quantity: item.quantity || 1,
-                name: product?.name || "Product",
+                name: finalProduct?.name || "Product",
                 image:
-                  product?.image ||
+                  finalProduct?.images?.[0]?.url ||
+                  finalProduct?.image ||
                   "https://via.placeholder.com/80",
               };
             })
@@ -149,7 +154,7 @@ const AdminProvider = ({ children }) => {
   }, [products]);
 
   /* =====================================================
-     INITIAL LOAD (ORDER IS IMPORTANT)
+     INITIAL LOAD (ORDER MATTERS)
   ===================================================== */
   useEffect(() => {
     fetchProducts();
