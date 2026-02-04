@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
@@ -6,18 +6,14 @@ import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import toast from "react-hot-toast";
 
 const Cart = () => {
-  const {
-    cart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    guest,
-    updateGuest,
-  } = useContext(AppContext);
+  const { cart, removeFromCart, updateQuantity, clearCart, user } =
+    useContext(AppContext);
 
   const navigate = useNavigate();
+  const [guest, setGuest] = useState({ name: "", phone: "", address: "" });
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -28,18 +24,42 @@ const Cart = () => {
     0
   );
 
-  const confirmOrder = async () => {
-    if (!guest.name || !guest.phone || !guest.address)
-      return alert("Please fill delivery details");
-    if (cart.length === 0) return alert("Your cart is empty");
+  // Fetch user address from DB
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || !user) return;
+
+      try {
+        const res = await axios.get(`${API}/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data) {
+          setGuest({
+            name: res.data.name || "",
+            phone: res.data.phone || "",
+            address: res.data.address || "",
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to fetch address:", err);
+      }
+    };
+
+    fetchAddress();
+  }, [user]);
+
+  // Save address to DB
+  const saveAddress = async () => {
+    if (!guest.name || !guest.phone || !guest.address) {
+      return toast.error("Please fill all delivery details");
+    }
 
     const token = localStorage.getItem("token");
-    if (!token) return alert("Please login to place order");
-
-    setLoading(true);
+    if (!token || !user) return toast.error("Please login to save address");
 
     try {
-      // Save address
       await axios.put(
         `${API}/users/address`,
         {
@@ -47,9 +67,37 @@ const Cart = () => {
           phone: guest.phone,
           address: guest.address,
         },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Address saved to DB ✅");
+      setIsEditingAddress(false);
+    } catch (err) {
+      console.error("Failed to save address:", err);
+      toast.error("Failed to save address ❌");
+    }
+  };
+
+  // Place order
+  const confirmOrder = async () => {
+    if (!guest.name || !guest.phone || !guest.address)
+      return toast.error("Please fill delivery details");
+    if (cart.length === 0) return toast.error("Your cart is empty");
+
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("Please login to place order");
+
+    setLoading(true);
+
+    try {
+      // Save address to DB before order
+      await axios.put(
+        `${API}/users/address`,
         {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+          name: guest.name,
+          phone: guest.phone,
+          address: guest.address,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Place order
@@ -69,16 +117,15 @@ const Cart = () => {
             price: item.price,
           })),
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       clearCart();
+      toast.success("Order placed successfully 🎉");
       navigate("/order-success");
     } catch (err) {
       console.error("Order error:", err);
-      alert("Order failed");
+      toast.error("Order failed ❌");
     } finally {
       setLoading(false);
     }
@@ -164,15 +211,18 @@ const Cart = () => {
               <input
                 placeholder="Full Name"
                 value={guest.name}
-                onChange={(e) => updateGuest({ name: e.target.value })}
+                onChange={(e) =>
+                  setGuest((prev) => ({ ...prev, name: e.target.value }))
+                }
                 className="w-full border rounded-lg px-3 py-2"
               />
 
-              {/* PHONE INPUT */}
               <PhoneInput
                 country={"in"}
                 value={guest.phone || ""}
-                onChange={(phone) => updateGuest({ phone })}
+                onChange={(phone) =>
+                  setGuest((prev) => ({ ...prev, phone }))
+                }
                 onlyCountries={["in", "us", "ae", "gb"]}
                 enableSearch
                 countryCodeEditable={false}
@@ -187,13 +237,15 @@ const Cart = () => {
               <textarea
                 placeholder="Full Address"
                 value={guest.address}
-                onChange={(e) => updateGuest({ address: e.target.value })}
+                onChange={(e) =>
+                  setGuest((prev) => ({ ...prev, address: e.target.value }))
+                }
                 className="w-full border rounded-lg px-3 py-2"
               />
 
               <button
-                onClick={() => setIsEditingAddress(false)}
-                className="text-sm text-indigo-500"
+                onClick={saveAddress}
+                className="text-sm text-indigo-500 font-medium"
               >
                 Save Address
               </button>
@@ -203,7 +255,7 @@ const Cart = () => {
               <p>{guest.address}</p>
               <button
                 onClick={() => setIsEditingAddress(true)}
-                className="text-indigo-500 text-sm mt-1"
+                className="text-indigo-500 text-sm mt-1 font-medium"
               >
                 Change
               </button>
