@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import Businesslogo from "../Assets/logob.png";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,7 +38,13 @@ const Navbar = () => {
           onClick={() => goTo("/")}
           className="cursor-pointer text-xl font-extrabold tracking-wider bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent"
         >
-          ONE GRAM gold
+         <div className="flex items-center">
+  <img src={Businesslogo} alt="Logo" className="h-10 w-10 object-contain rounded-full" />
+ <h1 className="ml-2 text-lg font-semibold bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] bg-clip-text text-transparent">
+    ONE GRAM Gold
+  </h1>
+</div>
+
         </div>
 
         {/* Desktop Menu */}
