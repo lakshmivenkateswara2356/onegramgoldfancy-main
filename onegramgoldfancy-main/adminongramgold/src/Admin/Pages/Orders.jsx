@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAdmin } from "../../context/AdminContext";
 
+const CLOUDINARY_BASE = "https://res.cloudinary.com/<your-cloud-name>/image/upload/";
+
 const Orders = () => {
   const { orders = [], fetchOrders } = useAdmin();
   const [editing, setEditing] = useState(null);
@@ -81,6 +83,15 @@ Your order will be delivered soon 🙏
     }
   };
 
+  // ✅ Helper to get full Cloudinary image URL
+  const getCloudinaryImage = (img) => {
+    if (!img) return "https://via.placeholder.com/80";
+    // If already full URL, return it
+    if (img.startsWith("http")) return img;
+    // Otherwise, append to Cloudinary base
+    return `${CLOUDINARY_BASE}${img}`;
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <h2 className="text-3xl font-bold mb-6">Orders Dashboard</h2>
@@ -104,14 +115,14 @@ Your order will be delivered soon 🙏
 
               <p className="text-sm">📞 {o.phone}</p>
 
-              {/* ✅ PRODUCTS WITH IMAGE */}
+              {/* ✅ PRODUCTS WITH CLOUDINARY IMAGE */}
               <div className="space-y-2">
                 <p className="font-medium">Products:</p>
 
                 {o.items?.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <img
-                      src={item.image}
+                      src={getCloudinaryImage(item.image)}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded border"
                     />
