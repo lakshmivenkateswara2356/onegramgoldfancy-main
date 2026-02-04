@@ -7,12 +7,13 @@ const {
   removeFromWishlist,
 } = require("../controllers/wishlist.controller");
 
-router.get("/test", (req, res) => {
-  res.json({ wishlist: "route working" });
-});
-
+// GET wishlist
 router.get("/", auth, getWishlist);
+
+// ADD to wishlist
 router.post("/:productId", auth, addToWishlist);
+
+// REMOVE from wishlist
 router.delete("/:productId", auth, removeFromWishlist);
 
 module.exports = router;
