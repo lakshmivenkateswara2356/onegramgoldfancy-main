@@ -37,10 +37,16 @@ const AdminProvider = ({ children }) => {
 
       const formatted = data.map((p) => ({
         ...p,
+
+        /* ✅ CLOUDINARY SAFE IMAGE */
         image:
-          Array.isArray(p.images) && p.images.length > 0
-            ? p.images[0]
+          Array.isArray(p.images) &&
+          p.images.length > 0 &&
+          p.images[0]?.url
+            ? p.images[0].url
             : "https://via.placeholder.com/120",
+
+        name: p.name || "Product",
       }));
 
       setProducts(formatted);
@@ -80,7 +86,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS ✅ FINAL FIX
+     ORDERS
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -116,7 +122,7 @@ const AdminProvider = ({ children }) => {
         tracking_id: o.tracking_id || "",
         courier_name: o.courier_name || "",
 
-        /* 🔥 MERGE PRODUCT DATA HERE */
+        /* ✅ FIXED PRODUCT MERGE */
         items: Array.isArray(o.items)
           ? o.items.map((item) => {
               const product = products.find(
@@ -143,7 +149,7 @@ const AdminProvider = ({ children }) => {
   }, [products]);
 
   /* =====================================================
-     INITIAL LOAD (ORDER MATTERS)
+     INITIAL LOAD (ORDER IS IMPORTANT)
   ===================================================== */
   useEffect(() => {
     fetchProducts();

@@ -1,4 +1,4 @@
-import React, { useContext,  useState } from "react";
+import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
@@ -36,7 +36,7 @@ const Cart = () => {
     setLoading(true);
 
     try {
-      // ✅ Save address to backend user profile
+      // ✅ Save address
       await axios.put(
         `${API}/users/address`,
         {
@@ -49,7 +49,7 @@ const Cart = () => {
         }
       );
 
-      // ✅ Place order
+      // ✅ PLACE ORDER (IMPORTANT FIX)
       await axios.post(
         `${API}/orders`,
         {
@@ -58,6 +58,15 @@ const Cart = () => {
           customer_name: guest.name,
           phone: guest.phone,
           address: guest.address,
+
+          // ✅ SEND FULL PRODUCT DATA TO BACKEND
+          items: cart.map((item) => ({
+            id: item.id,
+            name: item.name,
+            image: item.image || "https://via.placeholder.com/120",
+            quantity: item.quantity,
+            price: item.price,
+          })),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -67,7 +76,7 @@ const Cart = () => {
       clearCart();
       navigate("/order-success");
     } catch (err) {
-      console.error(err);
+      console.error("Order error:", err);
       alert("Order failed");
     } finally {
       setLoading(false);
@@ -100,7 +109,7 @@ const Cart = () => {
                   className="bg-white rounded-xl p-5 shadow-sm flex gap-5"
                 >
                   <img
-                    src={item.image}
+                    src={item.image || "https://via.placeholder.com/120"}
                     alt={item.name}
                     className="w-28 h-28 object-cover rounded-lg border"
                   />
@@ -115,7 +124,10 @@ const Cart = () => {
                         min="1"
                         value={item.quantity}
                         onChange={(e) =>
-                          updateQuantity(item.id, Math.max(1, +e.target.value))
+                          updateQuantity(
+                            item.id,
+                            Math.max(1, Number(e.target.value))
+                          )
                         }
                         className="w-16 border rounded-md px-2 py-1"
                       />
@@ -151,25 +163,19 @@ const Cart = () => {
               <input
                 placeholder="Full Name"
                 value={guest.name}
-                onChange={(e) =>
-                  updateGuest({ name: e.target.value })
-                }
+                onChange={(e) => updateGuest({ name: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2"
               />
               <input
                 placeholder="WhatsApp Number"
                 value={guest.phone}
-                onChange={(e) =>
-                  updateGuest({ phone: e.target.value })
-                }
+                onChange={(e) => updateGuest({ phone: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2"
               />
               <textarea
                 placeholder="Full Address"
                 value={guest.address}
-                onChange={(e) =>
-                  updateGuest({ address: e.target.value })
-                }
+                onChange={(e) => updateGuest({ address: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2"
               />
               <button
@@ -201,13 +207,11 @@ const Cart = () => {
           <button
             onClick={confirmOrder}
             disabled={loading}
-            className={`w-full mt-6 py-3 rounded-xl text-white font-medium transition
-              ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] hover:opacity-90"
-              }
-            `}
+            className={`w-full mt-6 py-3 rounded-xl text-white font-medium transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] hover:opacity-90"
+            }`}
           >
             {loading ? "Placing Order..." : "Place Order"}
           </button>
