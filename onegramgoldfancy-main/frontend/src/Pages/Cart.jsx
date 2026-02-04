@@ -6,23 +6,20 @@ import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart } =
-    useContext(AppContext);
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    guest,
+    updateGuest,
+  } = useContext(AppContext);
 
   const navigate = useNavigate();
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [guest, setGuest] = useState({
-    name: "",
-    phone: "",
-    address: "",
-  });
-
-  useEffect(() => {
-    const saved = localStorage.getItem("deliveryAddress");
-    if (saved) setGuest(JSON.parse(saved));
-  }, []);
+  const API = "https://onegramgoldfancy-main.onrender.com/api";
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -37,11 +34,24 @@ const Cart = () => {
     if (cart.length === 0) return alert("Your cart is empty");
 
     setLoading(true);
-    localStorage.setItem("deliveryAddress", JSON.stringify(guest));
 
     try {
+      // ✅ Save address to backend user profile
+      await axios.put(
+        `${API}/users/address`,
+        {
+          name: guest.name,
+          phone: guest.phone,
+          address: guest.address,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // ✅ Place order
       await axios.post(
-        "https://onegramgoldfancy-main.onrender.com/api/orders",
+        `${API}/orders`,
         {
           grams: cart.reduce((sum, item) => sum + item.quantity, 0),
           total_amount: subtotal,
@@ -57,6 +67,7 @@ const Cart = () => {
       clearCart();
       navigate("/order-success");
     } catch (err) {
+      console.error(err);
       alert("Order failed");
     } finally {
       setLoading(false);
@@ -68,7 +79,6 @@ const Cart = () => {
       <Navbar />
 
       <div className="pt-24 px-5 max-w-7xl mx-auto grid md:grid-cols-[2fr_1fr] gap-10">
-
         {/* CART ITEMS */}
         <div>
           <h1 className="text-2xl font-semibold mb-6">
@@ -132,7 +142,6 @@ const Cart = () => {
         <div className="bg-white rounded-2xl p-6 shadow-md h-fit">
           <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-          {/* Address */}
           <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">
             Delivery Address
           </p>
@@ -143,7 +152,7 @@ const Cart = () => {
                 placeholder="Full Name"
                 value={guest.name}
                 onChange={(e) =>
-                  setGuest({ ...guest, name: e.target.value })
+                  updateGuest({ name: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
               />
@@ -151,7 +160,7 @@ const Cart = () => {
                 placeholder="WhatsApp Number"
                 value={guest.phone}
                 onChange={(e) =>
-                  setGuest({ ...guest, phone: e.target.value })
+                  updateGuest({ phone: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
               />
@@ -159,7 +168,7 @@ const Cart = () => {
                 placeholder="Full Address"
                 value={guest.address}
                 onChange={(e) =>
-                  setGuest({ ...guest, address: e.target.value })
+                  updateGuest({ address: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
               />
