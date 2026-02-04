@@ -1,4 +1,5 @@
-const pool = require("../db"); // your PostgreSQL pool connection
+const pool = require("../config/db");
+ // your PostgreSQL pool connection
 
 /**
  * Get the logged-in user's profile
