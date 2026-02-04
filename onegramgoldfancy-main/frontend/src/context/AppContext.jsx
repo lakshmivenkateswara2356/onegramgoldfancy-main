@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import goldring from "../Assets/rings.webp";
@@ -79,33 +79,26 @@ const AppProvider = ({ children }) => {
 
   /* ------------------ WISHLIST (Postgres) ------------------ */
   const [wishlist, setWishlist] = useState([]);
-  const API = "https://onegramgoldfancy-main.onrender.com/api"; // keep other APIs same
+  const API = "https://onegramgoldfancy-main.onrender.com/api";
 
-  // FETCH WISHLIST
-  const fetchWishlist = async () => {
+  // ✅ FIXED: wrapped with useCallback
+  const fetchWishlist = useCallback(async () => {
     const token = localStorage.getItem("token");
-    if (!token || !user) {
-      console.warn("No user or token, skipping wishlist fetch");
-      return;
-    }
+    if (!token || !user) return;
 
     try {
-      console.log("Fetching wishlist from:", `${API}/wishlist`);
       const res = await axios.get(`${API}/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Backend returns array of product IDs
       const ids = Array.isArray(res.data) ? res.data : [];
       setWishlist(ids);
-      console.log("Fetched wishlist:", ids);
     } catch (err) {
-      console.error("Failed to fetch wishlist:", err.response?.data || err);
+      console.error("Failed to fetch wishlist:", err);
       toast.error("Failed to fetch wishlist");
     }
-  };
+  }, [API, user]);
 
-  // TOGGLE WISHLIST
   const toggleWishlist = async (productId) => {
     const token = localStorage.getItem("token");
     if (!token || !user) {
@@ -115,34 +108,31 @@ const AppProvider = ({ children }) => {
 
     try {
       if (wishlist.includes(productId)) {
-        // DELETE
-        console.log("Removing from wishlist:", productId);
         await axios.delete(`${API}/wishlist/${productId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setWishlist((prev) => prev.filter((id) => id !== productId));
         toast.success("Removed from favorites ❤️");
       } else {
-        // ADD
-        console.log("Adding to wishlist:", productId);
         await axios.post(
           `${API}/wishlist/${productId}`,
-          {}, // Postgres API expects no body
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setWishlist((prev) => [...prev, productId]);
         toast.success("Added to favorites ❤️");
       }
     } catch (err) {
-      console.error("Wishlist update failed:", err.response?.data || err);
+      console.error("Wishlist update failed:", err);
       toast.error("Failed to update favorites");
     }
   };
 
+  // ✅ FIXED dependency
   useEffect(() => {
     if (user) fetchWishlist();
     else setWishlist([]);
-  }, [user]);
+  }, [user, fetchWishlist]);
 
   /* ------------------ PRODUCTS ------------------ */
   const [products, setProducts] = useState({});
@@ -244,7 +234,6 @@ const AppProvider = ({ children }) => {
     navigate("/cart");
   };
 
-  /* ------------------ CONTEXT ------------------ */
   return (
     <AppContext.Provider
       value={{
