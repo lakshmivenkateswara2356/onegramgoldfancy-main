@@ -65,9 +65,7 @@ const AdminProvider = ({ children }) => {
       setLoadingBanners(true);
 
       const res = await fetch(`${API_URL}/banners`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -82,7 +80,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS (USING SAME ORDERS TABLE)
+     ORDERS ✅ FINAL FIX
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -95,9 +93,7 @@ const AdminProvider = ({ children }) => {
       setLoadingOrders(true);
 
       const res = await fetch(`${API_URL}/orders/admin`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -120,8 +116,22 @@ const AdminProvider = ({ children }) => {
         tracking_id: o.tracking_id || "",
         courier_name: o.courier_name || "",
 
-        // ✅ items coming from backend (NO DB CHANGE HERE)
-        items: Array.isArray(o.items) ? o.items : [],
+        /* 🔥 MERGE PRODUCT DATA HERE */
+        items: Array.isArray(o.items)
+          ? o.items.map((item) => {
+              const product = products.find(
+                (p) => String(p.id) === String(item.product_id)
+              );
+
+              return {
+                quantity: item.quantity || 1,
+                name: product?.name || "Product",
+                image:
+                  product?.image ||
+                  "https://via.placeholder.com/80",
+              };
+            })
+          : [],
       }));
 
       setOrders(formatted);
@@ -130,16 +140,24 @@ const AdminProvider = ({ children }) => {
     } finally {
       setLoadingOrders(false);
     }
-  }, []);
+  }, [products]);
 
   /* =====================================================
-     INITIAL LOAD
+     INITIAL LOAD (ORDER MATTERS)
   ===================================================== */
   useEffect(() => {
     fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      fetchOrders();
+    }
+  }, [products, fetchOrders]);
+
+  useEffect(() => {
     fetchBanners();
-    fetchOrders();
-  }, [fetchProducts, fetchBanners, fetchOrders]);
+  }, [fetchBanners]);
 
   /* =====================================================
      CONTEXT VALUE
@@ -147,19 +165,16 @@ const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
-        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
-        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
-        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,
