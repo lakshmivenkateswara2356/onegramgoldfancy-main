@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import axios from "axios";
 
 /* =====================================================
@@ -25,9 +31,11 @@ const AdminProvider = ({ children }) => {
   const fetchProducts = useCallback(async () => {
     try {
       setLoadingProducts(true);
-      const res = await axios.get(`${API_URL}/products`);
 
-      const formatted = res.data.map((p) => ({
+      const res = await axios.get(`${API_URL}/products`);
+      const data = Array.isArray(res.data) ? res.data : [];
+
+      const formatted = data.map((p) => ({
         ...p,
         image:
           Array.isArray(p.images) && p.images.length > 0
@@ -55,14 +63,17 @@ const AdminProvider = ({ children }) => {
 
     try {
       setLoadingBanners(true);
+
       const res = await fetch(`${API_URL}/banners`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
+      const data = await res.json();
       if (!res.ok) throw new Error("Failed to fetch banners");
 
-      const data = await res.json();
-      setBanners(data.banners || data || []);
+      setBanners(data?.banners || data || []);
     } catch (err) {
       console.error("Fetch banners error:", err);
     } finally {
@@ -71,7 +82,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS ✅ FIXED WITH ITEMS
+     ORDERS (USING SAME ORDERS TABLE)
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -84,7 +95,9 @@ const AdminProvider = ({ children }) => {
       setLoadingOrders(true);
 
       const res = await fetch(`${API_URL}/orders/admin`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -107,8 +120,8 @@ const AdminProvider = ({ children }) => {
         tracking_id: o.tracking_id || "",
         courier_name: o.courier_name || "",
 
-        // ✅ IMPORTANT FIX
-        items: o.items || [],
+        // ✅ items coming from backend (NO DB CHANGE HERE)
+        items: Array.isArray(o.items) ? o.items : [],
       }));
 
       setOrders(formatted);
@@ -134,16 +147,19 @@ const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
+        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
+        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
+        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,
