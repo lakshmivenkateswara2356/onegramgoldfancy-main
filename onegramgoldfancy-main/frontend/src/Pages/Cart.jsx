@@ -148,6 +148,12 @@ const Cart = () => {
           {cart.length === 0 ? (
             <div className="bg-white rounded-xl p-10 text-center shadow-sm">
               <p className="text-gray-500">Your cart is empty</p>
+              <button
+        onClick={() => navigate("/")} // or use router Link
+        className="px-6 py-2 bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white rounded-lg hover:opacity-90 transition"
+      >
+        Back to Shopping
+      </button>
             </div>
           ) : (
             <div className="space-y-6">

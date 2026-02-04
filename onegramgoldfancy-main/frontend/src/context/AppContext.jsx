@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import goldring from "../Assets/rings.webp";
 import chain from "../Assets/goldchains.jpg";
 import pendent from "../Assets/pendent.jpg";
+import WelcomeModal from "../Pages/WelcomeModal"; // ✅ Import WelcomeModal
 
 export const AppContext = createContext(null);
 
@@ -17,9 +18,23 @@ const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // ✅ Welcome modal state
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
   useEffect(() => {
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-    else localStorage.removeItem("user");
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // ✅ Show welcome modal on first login
+      const isFirstLogin = !localStorage.getItem("welcomeShown");
+      if (isFirstLogin) {
+        setShowWelcomeModal(true);
+        localStorage.setItem("welcomeShown", "true");
+      }
+    } else {
+      localStorage.removeItem("user");
+      localStorage.removeItem("welcomeShown"); // reset on logout
+    }
   }, [user]);
 
   /* ------------------ GUEST ------------------ */
@@ -81,7 +96,6 @@ const AppProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
   const API = "https://onegramgoldfancy-main.onrender.com/api";
 
-  // ✅ FIXED: wrapped with useCallback
   const fetchWishlist = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token || !user) return;
@@ -90,7 +104,6 @@ const AppProvider = ({ children }) => {
       const res = await axios.get(`${API}/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const ids = Array.isArray(res.data) ? res.data : [];
       setWishlist(ids);
     } catch (err) {
@@ -128,7 +141,6 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  // ✅ FIXED dependency
   useEffect(() => {
     if (user) fetchWishlist();
     else setWishlist([]);
@@ -260,6 +272,14 @@ const AppProvider = ({ children }) => {
       }}
     >
       {children}
+
+      {/* ✅ Welcome Modal */}
+      {showWelcomeModal && (
+        <WelcomeModal
+          userName={user?.name || "User"}
+          onClose={() => setShowWelcomeModal(false)}
+        />
+      )}
     </AppContext.Provider>
   );
 };

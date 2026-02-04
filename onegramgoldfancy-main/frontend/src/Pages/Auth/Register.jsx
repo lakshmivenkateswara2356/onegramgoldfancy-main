@@ -81,7 +81,7 @@ export default function Register() {
 
           <button
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold hover:shadow-lg transition disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white font-semibold hover:shadow-lg transition disabled:opacity-50"
           >
             {loading ? "Registering..." : "Register"}
           </button>
