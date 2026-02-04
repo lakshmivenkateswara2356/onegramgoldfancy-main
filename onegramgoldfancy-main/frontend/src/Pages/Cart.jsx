@@ -4,6 +4,8 @@ import Navbar from "../Components/Navbar";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 const Cart = () => {
   const {
@@ -27,16 +29,17 @@ const Cart = () => {
   );
 
   const confirmOrder = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Please login to place order");
     if (!guest.name || !guest.phone || !guest.address)
       return alert("Please fill delivery details");
     if (cart.length === 0) return alert("Your cart is empty");
 
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Please login to place order");
+
     setLoading(true);
 
     try {
-      // ✅ Save address
+      // Save address
       await axios.put(
         `${API}/users/address`,
         {
@@ -49,7 +52,7 @@ const Cart = () => {
         }
       );
 
-      // ✅ PLACE ORDER (IMPORTANT FIX)
+      // Place order
       await axios.post(
         `${API}/orders`,
         {
@@ -58,8 +61,6 @@ const Cart = () => {
           customer_name: guest.name,
           phone: guest.phone,
           address: guest.address,
-
-          // ✅ SEND FULL PRODUCT DATA TO BACKEND
           items: cart.map((item) => ({
             id: item.id,
             name: item.name,
@@ -166,18 +167,30 @@ const Cart = () => {
                 onChange={(e) => updateGuest({ name: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2"
               />
-              <input
-                placeholder="WhatsApp Number"
-                value={guest.phone}
-                onChange={(e) => updateGuest({ phone: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
+
+              {/* PHONE INPUT */}
+              <PhoneInput
+                country={"in"}
+                value={guest.phone || ""}
+                onChange={(phone) => updateGuest({ phone })}
+                onlyCountries={["in", "us", "ae", "gb"]}
+                enableSearch
+                countryCodeEditable={false}
+                inputProps={{
+                  name: "phone",
+                  required: true,
+                  autoFocus: false,
+                }}
+                inputClass="w-full border rounded-lg px-3 py-2"
               />
+
               <textarea
                 placeholder="Full Address"
                 value={guest.address}
                 onChange={(e) => updateGuest({ address: e.target.value })}
                 className="w-full border rounded-lg px-3 py-2"
               />
+
               <button
                 onClick={() => setIsEditingAddress(false)}
                 className="text-sm text-indigo-500"
