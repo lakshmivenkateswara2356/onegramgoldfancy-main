@@ -14,7 +14,6 @@ const API_URL = "https://onegramgoldfancy-main.onrender.com/api";
 ===================================================== */
 const AdminProvider = ({ children }) => {
   /* ================= TOKEN ================= */
-  // ✅ FIX: use correct admin token key
   const getToken = () => localStorage.getItem("adminToken");
 
   /* =====================================================
@@ -26,7 +25,6 @@ const AdminProvider = ({ children }) => {
   const fetchProducts = useCallback(async () => {
     try {
       setLoadingProducts(true);
-
       const res = await axios.get(`${API_URL}/products`);
 
       const formatted = res.data.map((p) => ({
@@ -57,7 +55,6 @@ const AdminProvider = ({ children }) => {
 
     try {
       setLoadingBanners(true);
-
       const res = await fetch(`${API_URL}/banners`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -74,17 +71,14 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS  ✅ FIXED
+     ORDERS ✅ FIXED WITH ITEMS
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     const token = getToken();
-    if (!token) {
-      console.warn("Admin token missing");
-      return;
-    }
+    if (!token) return;
 
     try {
       setLoadingOrders(true);
@@ -99,10 +93,8 @@ const AdminProvider = ({ children }) => {
         return;
       }
 
-      // ✅ Backend returns ARRAY directly
       const ordersArray = Array.isArray(data) ? data : [];
 
-      // ✅ FIELD NAMES MATCH BACKEND
       const formatted = ordersArray.map((o) => ({
         id: o.id,
         customer: o.customer_name || "Guest",
@@ -114,6 +106,9 @@ const AdminProvider = ({ children }) => {
         createdAt: o.created_at,
         tracking_id: o.tracking_id || "",
         courier_name: o.courier_name || "",
+
+        // ✅ IMPORTANT FIX
+        items: o.items || [],
       }));
 
       setOrders(formatted);
@@ -139,19 +134,16 @@ const AdminProvider = ({ children }) => {
   return (
     <AdminContext.Provider
       value={{
-        /* PRODUCTS */
         products,
         loadingProducts,
         fetchProducts,
         setProducts,
 
-        /* BANNERS */
         banners,
         loadingBanners,
         fetchBanners,
         setBanners,
 
-        /* ORDERS */
         orders,
         loadingOrders,
         fetchOrders,

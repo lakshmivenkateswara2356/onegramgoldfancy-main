@@ -43,7 +43,6 @@ const Orders = () => {
       setEditing(null);
       fetchOrders();
 
-      // 📲 WhatsApp message
       if (order.phone) {
         const message = `
 Hi ${order.customer} 👋
@@ -53,15 +52,13 @@ Order ID: ${order.id}
 Courier: ${trackingInfo.courier_name}
 Tracking ID: ${trackingInfo.tracking_id}
 
-Please complete payment.
 Your order will be delivered soon 🙏
         `;
 
-        const whatsappURL = `https://wa.me/91${order.phone}?text=${encodeURIComponent(
-          message
-        )}`;
-
-        window.open(whatsappURL, "_blank");
+        window.open(
+          `https://wa.me/91${order.phone}?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
       }
 
       alert("Tracking updated & WhatsApp opened");
@@ -90,47 +87,44 @@ Your order will be delivered soon 🙏
 
       <div className="flex flex-wrap gap-6">
         {orders.map((o) => (
-          <div
-            key={o.id}
-            className="bg-white rounded-lg shadow-md w-[340px]"
-          >
+          <div key={o.id} className="bg-white rounded-lg shadow-md w-[340px]">
             <div className={`h-1 ${statusColor(o.status)}`} />
 
             <div className="p-4 space-y-3">
-              {/* Customer */}
               <div className="flex justify-between">
                 <p className="font-semibold">{o.customer}</p>
-                <span className={`text-xs px-2 py-1 rounded text-white ${statusColor(o.status)}`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded text-white ${statusColor(
+                    o.status
+                  )}`}
+                >
                   {o.status}
                 </span>
               </div>
 
-              {/* Mobile */}
-              <p className="text-sm">
-                📞 <span className="font-medium">{o.phone || "N/A"}</span>
-              </p>
+              <p className="text-sm">📞 {o.phone}</p>
 
-              {/* Products */}
-              <div className="text-sm">
+              {/* ✅ PRODUCTS WITH IMAGE */}
+              <div className="space-y-2">
                 <p className="font-medium">Products:</p>
-                <ul className="list-disc ml-5">
-                  {o.items?.map((item, i) => (
-                    <li key={i}>
+
+                {o.items?.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 object-cover rounded border"
+                    />
+                    <p className="text-sm">
                       {item.name} × {item.quantity}
-                    </li>
-                  ))}
-                </ul>
+                    </p>
+                  </div>
+                ))}
               </div>
 
-              {/* Address */}
-              <p className="text-sm">
-                📍 {o.address}
-              </p>
-
-              {/* Total */}
+              <p className="text-sm">📍 {o.address}</p>
               <p className="font-semibold">₹ {o.total}</p>
 
-              {/* Tracking */}
               {editing === o.id ? (
                 <>
                   <input
@@ -138,7 +132,10 @@ Your order will be delivered soon 🙏
                     placeholder="Courier Name"
                     value={trackingInfo.courier_name}
                     onChange={(e) =>
-                      setTrackingInfo({ ...trackingInfo, courier_name: e.target.value })
+                      setTrackingInfo({
+                        ...trackingInfo,
+                        courier_name: e.target.value,
+                      })
                     }
                   />
                   <input
@@ -146,14 +143,23 @@ Your order will be delivered soon 🙏
                     placeholder="Tracking ID"
                     value={trackingInfo.tracking_id}
                     onChange={(e) =>
-                      setTrackingInfo({ ...trackingInfo, tracking_id: e.target.value })
+                      setTrackingInfo({
+                        ...trackingInfo,
+                        tracking_id: e.target.value,
+                      })
                     }
                   />
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setEditing(null)} className="px-3 py-1 bg-gray-400 text-white rounded">
+                    <button
+                      onClick={() => setEditing(null)}
+                      className="px-3 py-1 bg-gray-400 text-white rounded"
+                    >
                       Cancel
                     </button>
-                    <button onClick={() => handleSave(o)} className="px-3 py-1 bg-blue-500 text-white rounded">
+                    <button
+                      onClick={() => handleSave(o)}
+                      className="px-3 py-1 bg-blue-500 text-white rounded"
+                    >
                       Save
                     </button>
                   </div>
