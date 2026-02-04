@@ -18,6 +18,7 @@ import Orders from "./Pages/Orders";
 import OrderSuccess from "./Pages/OrderSuccess";
 import AllProducts from "./Pages/AllProducts";
 import CategoryProducts from "./Pages/CategoryProducts";
+import AboutPage from "./Components/Aboutpage/AboutPage";
 
 // ---------- UTILS ----------
 import ProtectedRoute from "./Components/ProtectedRoute";
@@ -56,6 +57,7 @@ const App = () => {
         />
         <Route path="/products" element={<AllProducts />} />
         <Route path="/category" element={<CategoryProducts />} />
+        <Route path="/about" element={<AboutPage />} />
 
 
         <Route

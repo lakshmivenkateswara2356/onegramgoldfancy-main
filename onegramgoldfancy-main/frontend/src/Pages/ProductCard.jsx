@@ -1,21 +1,23 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 
 const fallbackImage =
-  "https://via.placeholder.com/300x300?text=One+Gram+Gold";
+  "https://via.placeholder.com/400x400?text=One+Gram+Gold";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(AppContext);
   const navigate = useNavigate();
 
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   if (!product) return null;
 
-  // ✅ IMAGE RESOLUTION LOGIC (VERY IMPORTANT)
-   const imageSrc =
+  // ✅ IMAGE RESOLUTION LOGIC
+  const imageSrc =
     Array.isArray(product.images) && product.images.length > 0
       ? product.images[0]
-      : fallbackImage;               // ✅ fallback
+      : fallbackImage;
 
   return (
     <div
@@ -31,21 +33,31 @@ const ProductCard = ({ product }) => {
         flex-shrink-0
       "
     >
-      {/* IMAGE */}
+      {/* IMAGE SECTION */}
       <div className="relative h-44 bg-gray-100 overflow-hidden">
+        {/* Skeleton Loader */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 animate-pulse bg-gray-200" />
+        )}
+
         <img
           src={imageSrc}
           alt={product.name}
-          className="
-            w-full h-full object-cover
-            transition-transform duration-500
-            group-hover:scale-110
-          "
+          loading="lazy"              // ✅ LAZY LOAD
+          decoding="async"            // ✅ ASYNC DECODE
+          onLoad={() => setImageLoaded(true)}
           onError={(e) => {
             e.currentTarget.src = fallbackImage;
           }}
+          className={`
+            w-full h-full object-cover
+            transition-transform duration-500
+            group-hover:scale-110
+            ${imageLoaded ? "opacity-100" : "opacity-0"}
+          `}
         />
 
+        {/* PREMIUM TAG */}
         <span
           className="
             absolute top-3 left-3
@@ -92,4 +104,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard); // ✅ PERFORMANCE BOOST

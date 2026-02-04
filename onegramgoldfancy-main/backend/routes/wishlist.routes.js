@@ -1,14 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../middleware/auth.middleware");
+const auth = require("../middleware/auth.middleware");
 const {
-  addToWishlist,
   getWishlist,
+  addToWishlist,
   removeFromWishlist,
 } = require("../controllers/wishlist.controller");
 
-router.post("/:productId", authMiddleware, addToWishlist);
-router.get("/", authMiddleware, getWishlist);
-router.delete("/:productId", authMiddleware, removeFromWishlist);
+router.get("/test", (req, res) => {
+  res.json({ wishlist: "route working" });
+});
+
+router.get("/", auth, getWishlist);
+router.post("/:productId", auth, addToWishlist);
+router.delete("/:productId", auth, removeFromWishlist);
 
 module.exports = router;

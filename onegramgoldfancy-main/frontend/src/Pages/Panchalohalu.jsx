@@ -1,24 +1,34 @@
-import  { useContext } from "react";
+import { useContext } from "react";
 import Navbar from "../Components/Navbar";
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
 
 const Panchalohalu = () => {
-  const { products, wishlist, toggleWishlist } =
+  const { products, wishlist, toggleWishlist, user, loadingProducts } =
     useContext(AppContext);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const panchalohaluProducts = products?.panchalohalu || [];
 
-  if (!products) {
+  if (loadingProducts) {
     return (
       <div className="pt-24 text-center text-gray-500">
         Loading collection...
       </div>
     );
   }
+
+  const handleWishlist = (e, productId) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error("Please login to use wishlist ❤️");
+      return;
+    }
+    console.log("Toggling wishlist for productId:", productId);
+    toggleWishlist(productId);
+  };
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen font-poppins">
@@ -37,13 +47,17 @@ const Panchalohalu = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             <span className="text-sm font-medium ml-1">Back</span>
           </button>
         </div>
 
-        {/* Heading */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-semibold text-slate-800">
             Panchalohalu Collection
@@ -53,7 +67,6 @@ const Panchalohalu = () => {
           </p>
         </div>
 
-        {/* Grid */}
         {panchalohaluProducts.length === 0 ? (
           <p className="text-center text-gray-500">No products available</p>
         ) : (
@@ -64,20 +77,14 @@ const Panchalohalu = () => {
                 className="group bg-white rounded-xl border shadow-sm hover:shadow-lg transition cursor-pointer"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
-                {/* Image */}
                 <div className="relative overflow-hidden rounded-t-xl">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="h-44 w-full object-cover group-hover:scale-105 transition duration-500"
                   />
-
-                  {/* Wishlist */}
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleWishlist(product.id);
-                    }}
+                    onClick={(e) => handleWishlist(e, product.id)}
                     className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full shadow"
                   >
                     <Heart
@@ -91,17 +98,13 @@ const Panchalohalu = () => {
                   </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-3">
                   <h2 className="text-sm font-medium text-gray-900 line-clamp-2">
                     {product.name}
                   </h2>
-
                   <p className="text-lg font-semibold text-[#B08A2E] mt-1">
                     ₹{product.price}
                   </p>
-
-                  
                 </div>
               </div>
             ))}
@@ -112,7 +115,6 @@ const Panchalohalu = () => {
           ✨ Authentic Panchalohalu · Premium Finish
         </div>
       </div>
-      
     </div>
   );
 };

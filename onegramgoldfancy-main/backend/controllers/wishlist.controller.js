@@ -1,22 +1,26 @@
 const pool = require("../config/db");
 
-// ➕ Add to wishlist
+// ➕ ADD TO WISHLIST
 exports.addToWishlist = async (req, res) => {
   const userId = req.user.id;
   const { productId } = req.params;
 
   try {
     await pool.query(
-      "INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      `INSERT INTO wishlist (user_id, product_id)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id, product_id) DO NOTHING`,
       [userId, productId]
     );
+
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: "Add wishlist failed" });
+    console.error(err);
+    res.status(500).json({ message: "Add wishlist failed" });
   }
 };
 
-// 📥 Get wishlist
+// 📥 GET USER WISHLIST
 exports.getWishlist = async (req, res) => {
   const userId = req.user.id;
 
@@ -25,13 +29,16 @@ exports.getWishlist = async (req, res) => {
       "SELECT product_id FROM wishlist WHERE user_id = $1",
       [userId]
     );
-    res.json(result.rows);
+
+    // send only product IDs
+    res.json(result.rows.map(r => r.product_id));
   } catch (err) {
-    res.status(500).json({ error: "Fetch wishlist failed" });
+    console.error(err);
+    res.status(500).json({ message: "Fetch wishlist failed" });
   }
 };
 
-// ❌ Remove from wishlist
+// ❌ REMOVE FROM WISHLIST
 exports.removeFromWishlist = async (req, res) => {
   const userId = req.user.id;
   const { productId } = req.params;
@@ -41,8 +48,10 @@ exports.removeFromWishlist = async (req, res) => {
       "DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
+
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: "Remove wishlist failed" });
+    console.error(err);
+    res.status(500).json({ message: "Remove wishlist failed" });
   }
 };

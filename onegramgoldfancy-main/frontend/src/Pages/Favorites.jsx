@@ -4,21 +4,18 @@ import Navbar from "../Components/Navbar";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Footernavigations from "../Footernavigations";
-
+import toast from "react-hot-toast";
 
 const Favorites = () => {
-  const { products, wishlist, toggleWishlist, addToCart } =
+  const { products, wishlist, toggleWishlist, addToCart, user } =
     useContext(AppContext);
   const navigate = useNavigate();
-    
 
-  // merge all products into one array
   const allProducts = [
     ...(products?.panchalohalu || []),
     ...(products?.onegramgold || []),
   ];
 
-  // get only favorite products
   const favoriteProducts = allProducts.filter((product) =>
     wishlist.includes(product.id)
   );
@@ -29,23 +26,27 @@ const Favorites = () => {
 
       <div className="pt-20 px-4 max-w-7xl mx-auto">
         <div className="max-w-md mx-auto mb-4 flex items-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center  text-yellow-400 hover:text-yellow-500 transition"
-        >
-          {/* Back Icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-yellow-400 hover:text-yellow-500 transition"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="text-sm font-medium">Back</span>
-        </button>
-      </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span className="text-sm font-medium">Back</span>
+          </button>
+        </div>
 
         <h1 className="text-2xl font-bold mb-6">My Favorites ❤️</h1>
 
@@ -66,10 +67,14 @@ const Favorites = () => {
                     alt={product.name}
                     className="h-44 w-full object-cover"
                   />
-
-                  {/* Remove from favorites */}
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={() => {
+                      if (!user) {
+                        toast.error("Login to manage wishlist ❤️");
+                        return;
+                      }
+                      toggleWishlist(product.id);
+                    }}
                     className="absolute top-3 right-3 bg-white p-2 rounded-full shadow"
                   >
                     <Heart
@@ -100,7 +105,7 @@ const Favorites = () => {
           </div>
         )}
       </div>
-      <Footernavigations/>
+      <Footernavigations />
     </div>
   );
 };

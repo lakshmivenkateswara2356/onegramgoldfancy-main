@@ -14,6 +14,7 @@ const adminRoutes = require("./routes/admin.routes");
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");
 const bannerRoutes = require("./routes/banners.routes");
+const userRoutes = require("./routes/user.routes");
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/users", userRoutes);
 
 // -------------------- ROOT --------------------
 app.get("/", (req, res) => {

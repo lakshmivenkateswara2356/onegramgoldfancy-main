@@ -45,16 +45,12 @@ const AppProvider = ({ children }) => {
   const addToCart = (product) => {
     setCart((prev) => {
       const exists = prev.find((i) => i.id === product.id);
-
       if (exists) {
         toast.success("Quantity updated in cart 🛒");
         return prev.map((i) =>
-          i.id === product.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
+          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-
       toast.success("Item added to cart 🛒");
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -81,70 +77,115 @@ const AppProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ------------------ WISHLIST ------------------ */
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem("wishlist");
-    return saved ? JSON.parse(saved) : [];
-  });
+  /* ------------------ WISHLIST (Postgres) ------------------ */
+  const [wishlist, setWishlist] = useState([]);
+  const API = "https://onegramgoldfancy-main.onrender.com/api"; // keep other APIs same
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+  // FETCH WISHLIST
+  const fetchWishlist = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) {
+      console.warn("No user or token, skipping wishlist fetch");
+      return;
+    }
+
+    try {
+      console.log("Fetching wishlist from:", `${API}/wishlist`);
+      const res = await axios.get(`${API}/wishlist`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Backend returns array of product IDs
+      const ids = Array.isArray(res.data) ? res.data : [];
+      setWishlist(ids);
+      console.log("Fetched wishlist:", ids);
+    } catch (err) {
+      console.error("Failed to fetch wishlist:", err.response?.data || err);
+      toast.error("Failed to fetch wishlist");
+    }
+  };
+
+  // TOGGLE WISHLIST
+  const toggleWishlist = async (productId) => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) {
+      toast.error("Please login to manage favorites ❤️");
+      return;
+    }
+
+    try {
+      if (wishlist.includes(productId)) {
+        // DELETE
+        console.log("Removing from wishlist:", productId);
+        await axios.delete(`${API}/wishlist/${productId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setWishlist((prev) => prev.filter((id) => id !== productId));
+        toast.success("Removed from favorites ❤️");
+      } else {
+        // ADD
+        console.log("Adding to wishlist:", productId);
+        await axios.post(
+          `${API}/wishlist/${productId}`,
+          {}, // Postgres API expects no body
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setWishlist((prev) => [...prev, productId]);
+        toast.success("Added to favorites ❤️");
+      }
+    } catch (err) {
+      console.error("Wishlist update failed:", err.response?.data || err);
+      toast.error("Failed to update favorites");
+    }
   };
 
   useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+    if (user) fetchWishlist();
+    else setWishlist([]);
+  }, [user]);
 
   /* ------------------ PRODUCTS ------------------ */
   const [products, setProducts] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(true);
 
- const fetchProducts = async () => {
-  try {
-    setLoadingProducts(true);
-    const res = await axios.get(
-      "https://onegramgoldfancy-main.onrender.com/api/products"
-    );
+  const fetchProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const res = await axios.get(`${API}/products`);
+      const data = res.data || [];
 
-    const data = res.data || [];
+      const grouped = data.reduce((acc, product) => {
+        const cat = product.category?.toLowerCase().replace(/\s+/g, "-");
+        if (!acc[cat]) acc[cat] = [];
 
-    const grouped = data.reduce((acc, product) => {
-      const cat = product.category?.toLowerCase().replace(/\s+/g, "-");
-      if (!acc[cat]) acc[cat] = [];
+        acc[cat].push({
+          ...product,
+          price: Number(product.price) || 0,
+          oldPrice: product.old_price ? Number(product.old_price) : null,
+          discount:
+            product.old_price && product.price
+              ? Math.round(
+                  ((Number(product.old_price) - Number(product.price)) /
+                    Number(product.old_price)) *
+                    100
+                )
+              : 0,
+          image:
+            Array.isArray(product.images) && product.images.length > 0
+              ? product.images[0]
+              : "https://via.placeholder.com/120",
+        });
 
-      acc[cat].push({
-        ...product,
-        price: Number(product.price) || 0,
-        oldPrice: product.old_price ? Number(product.old_price) : null,
-        discount:
-          product.old_price && product.price
-            ? Math.round(
-                ((Number(product.old_price) - Number(product.price)) /
-                  Number(product.old_price)) *
-                  100
-              )
-            : 0,
+        return acc;
+      }, {});
 
-        // ✅ FIXED IMAGE HANDLING
-        image:
-          Array.isArray(product.images) && product.images.length > 0
-            ? product.images[0]
-            : "https://via.placeholder.com/120",
-      });
-
-      return acc;
-    }, {});
-
-    setProducts(grouped);
-  } catch (err) {
-    console.error("Failed to fetch products:", err);
-  } finally {
-    setLoadingProducts(false);
-  }
-};
-
+      setProducts(grouped);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -155,51 +196,33 @@ const AppProvider = ({ children }) => {
 
   useEffect(() => {
     setMiniProducts([
-      {
-        id: 1,
-        name: "Gold Ring",
-        category: "one-gram-gold",
-        image:
-         goldring,
-      },
-      {
-        id: 2,
-        name: "Gold Chain",
-        category: "one-gram-gold",
-        image:
-          chain,
-      },
+      { id: 1, name: "Gold Ring", category: "one-gram-gold", image: goldring },
+      { id: 2, name: "Gold Chain", category: "one-gram-gold", image: chain },
       {
         id: 3,
         name: "Panchalohalu Pendant",
         category: "panchalohalu",
-        image:
-          pendent,
+        image: pendent,
       },
     ]);
   }, []);
 
-  /* ------------------ BANNERS (FIXED) ------------------ */
+  /* ------------------ BANNERS ------------------ */
   const [banners, setBanners] = useState(() => {
     const cached = localStorage.getItem("cachedBanners");
     return cached ? JSON.parse(cached) : [];
   });
-
   const [loadingBanners, setLoadingBanners] = useState(true);
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get(
-        "https://onegramgoldfancy-main.onrender.com/api/banners"
-      );
-
-      if (res.data && res.data.length > 0) {
+      const res = await axios.get(`${API}/banners`);
+      if (res.data?.length) {
         setBanners(res.data);
         localStorage.setItem("cachedBanners", JSON.stringify(res.data));
       }
-    } catch (err) {
-      console.warn("Backend sleeping, using cached banners");
-      // IMPORTANT: do NOT clear banners
+    } catch {
+      console.warn("Using cached banners");
     } finally {
       setLoadingBanners(false);
     }
@@ -225,19 +248,12 @@ const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        /* UI */
         isMenuOpen,
         setIsMenuOpen,
-
-        /* User */
         user,
         setUser,
-
-        /* Guest */
         guest,
         updateGuest,
-
-        /* Cart */
         cart,
         cartCount,
         addToCart,
@@ -245,17 +261,11 @@ const AppProvider = ({ children }) => {
         updateQuantity,
         clearCart,
         buyNow,
-
-        /* Wishlist */
         wishlist,
         toggleWishlist,
-
-        /* Products */
         products,
         miniProducts,
         loadingProducts,
-
-        /* Banners */
         banners,
         loadingBanners,
       }}
