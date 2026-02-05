@@ -2,29 +2,33 @@ const pool = require("../config/db");
 const axios = require("axios");
 
 /* =====================================================
-   WHATSAPP SENDER (INTERNAL FUNCTION)
+   SEND WHATSAPP MESSAGE TO OWNER
 ===================================================== */
-const sendWhatsAppMessage = async (order, items) => {
+const sendWhatsAppToOwner = async (order, items) => {
   try {
-    const message = `
-🛍️ *New Order Placed*
+    const ownerNumber = process.env.OWNER_WHATSAPP; // 91XXXXXXXXXX
 
-👤 Name: ${order.customer_name}
+    const products =
+      items.length > 0
+        ? items
+            .map(
+              (item, i) =>
+                `${i + 1}. ${item.name}
+Qty: ${item.quantity}
+Amount: ₹${item.price * item.quantity}`
+            )
+            .join("\n\n")
+        : "Gold Order";
+
+    const message = `🛍️ *NEW ORDER RECEIVED*
+
+👤 Customer: ${order.customer_name}
 📞 Phone: ${order.phone}
 
 📦 Products:
-${items.length > 0
-  ? items
-      .map(
-        (item, index) =>
-          `${index + 1}. ${item.name}
-Qty: ${item.quantity}
-Price: ₹${item.price * item.quantity}`
-      )
-      .join("\n\n")
-  : "Gold Order"}
+${products}
 
-💰 Total: ₹${order.total_amount}
+💰 Total Amount: ₹${order.total_amount}
 💵 Payment: Cash on Delivery
 
 📍 Address:
@@ -35,7 +39,7 @@ ${order.address}
       `https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`,
       {
         messaging_product: "whatsapp",
-        to: order.phone, // must include country code (91XXXXXXXXXX)
+        to: ownerNumber,
         type: "text",
         text: { body: message },
       },
@@ -46,8 +50,13 @@ ${order.address}
         },
       }
     );
+
+    console.log("✅ WhatsApp message sent to OWNER");
   } catch (err) {
-    console.error("WHATSAPP ERROR:", err.message);
+    console.error(
+      "❌ WhatsApp Error:",
+      err.response?.data || err.message
+    );
   }
 };
 
@@ -86,7 +95,7 @@ exports.addOrder = async (req, res) => {
     const order = orderResult.rows[0];
 
     // 2️⃣ Insert order items
-    if (Array.isArray(items) && items.length > 0) {
+    if (items.length > 0) {
       for (const item of items) {
         await client.query(
           `INSERT INTO order_items
@@ -106,8 +115,8 @@ exports.addOrder = async (req, res) => {
 
     await client.query("COMMIT");
 
-    // 3️⃣ SEND WHATSAPP MESSAGE (AFTER COMMIT)
-    await sendWhatsAppMessage(order, items);
+    // 3️⃣ Send WhatsApp to OWNER (AFTER COMMIT)
+    await sendWhatsAppToOwner(order, items);
 
     res.status(201).json(order);
   } catch (err) {
@@ -200,7 +209,7 @@ exports.getAllOrders = async (req, res) => {
 };
 
 /* =====================================================
-   ADMIN – UPDATE TRACKING INFO
+   ADMIN – UPDATE TRACKING
 ===================================================== */
 exports.updateTracking = async (req, res) => {
   try {
