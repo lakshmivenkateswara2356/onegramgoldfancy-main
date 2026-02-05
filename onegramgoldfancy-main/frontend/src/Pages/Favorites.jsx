@@ -13,7 +13,7 @@ const Favorites = () => {
 
   const allProducts = [
     ...(products?.panchalohalu || []),
-    ...(products?.onegramgold || []),
+    ...(products?.["one-gram-gold"] || []),
   ];
 
   const favoriteProducts = allProducts.filter((product) =>

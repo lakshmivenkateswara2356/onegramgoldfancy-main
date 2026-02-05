@@ -4,9 +4,10 @@ import Navbar from "../Components/Navbar";
 import { AppContext } from "../context/AppContext";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const OneGramGold = () => {
-  const { products, wishlist, toggleWishlist, addToCart, loadingProducts } =
+  const { products, wishlist, toggleWishlist, addToCart,user, loadingProducts } =
     useContext(AppContext);
   const navigate = useNavigate();
 
@@ -19,6 +20,16 @@ const OneGramGold = () => {
       </div>
     );
   }
+
+   const handleWishlist = (e, productId) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error("Please login to use wishlist ❤️");
+      return;
+    }
+    console.log("Toggling wishlist for productId:", productId);
+    toggleWishlist(productId);
+  };
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen font-poppins">
@@ -69,10 +80,7 @@ const OneGramGold = () => {
                 />
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleWishlist(product.id);
-                  }}
+                  onClick={(e) => handleWishlist(e, product.id)}
                   className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full shadow"
                 >
                   <Heart

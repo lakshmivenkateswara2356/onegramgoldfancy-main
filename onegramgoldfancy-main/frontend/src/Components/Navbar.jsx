@@ -49,11 +49,11 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex gap-8 text-sm font-medium text-white">
-          <li onClick={() => goTo("/")} className="hover:text-yellow-400 cursor-pointer">Home</li>
-          <li onClick={() => goTo("/collections")} className="hover:text-yellow-400 cursor-pointer">Collections</li>
-          <li onClick={() => goTo("/new-arrivals")} className="hover:text-yellow-400 cursor-pointer">New Arrivals</li>
-          <li onClick={() => goTo("/about")} className="hover:text-yellow-400 cursor-pointer">About</li>
-          <li onClick={() => goTo("/contact")} className="hover:text-yellow-400 cursor-pointer">Contact</li>
+          <li onClick={() => goTo("/")} className="hover:text-[red] cursor-pointer">Home</li>
+          <li onClick={() => goTo("/collections")} className="hover:text-[#B08A2E] cursor-pointer">Collections</li>
+          <li onClick={() => goTo("/new-arrivals")} className="hover:text-[#B08A2E] cursor-pointer">New Arrivals</li>
+          <li onClick={() => goTo("/about")} className="hover:text-[#B08A2E] cursor-pointer">About</li>
+          <li onClick={() => goTo("/contact")} className="hover:text-[#B08A2E] cursor-pointer">Contact</li>
         </ul>
 
         {/* Right Icons */}
