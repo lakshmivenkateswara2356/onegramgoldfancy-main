@@ -120,29 +120,34 @@ const AdminProvider = ({ children }) => {
         courier_name: o.courier_name || "",
 
         items: Array.isArray(o.items)
-          ? o.items.map((item) => {
-              /* ✅ 1. USE POPULATED PRODUCT IF EXISTS */
-              const populatedProduct = item.product;
+  ? o.items.map((item) => {
+      const populatedProduct = item.product;
 
-              /* ✅ 2. FALLBACK TO PRODUCTS LIST */
-              const fallbackProduct = products.find(
-                (p) =>
-                  String(p.id) === String(item.product_id) ||
-                  String(p._id) === String(item.product_id)
-              );
+      const fallbackProduct = products.find(
+        (p) =>
+          String(p.id) === String(item.product_id) ||
+          String(p._id) === String(item.product_id)
+      );
 
-              const finalProduct = populatedProduct || fallbackProduct;
+      const finalProduct = populatedProduct || fallbackProduct;
 
-              return {
-                quantity: item.quantity || 1,
-                name: finalProduct?.name || "Product",
-                image:
-                  finalProduct?.images?.[0]?.url ||
-                  finalProduct?.image ||
-                  "https://via.placeholder.com/80",
-              };
-            })
-          : [],
+      return {
+        quantity: item.quantity || 1,
+        name:
+          finalProduct?.name ||
+          populatedProduct?.name ||
+          "Product",
+
+        // ✅ FIXED IMAGE RESOLUTION
+        image:
+          finalProduct?.image ||                // from products state
+          populatedProduct?.image ||             // if backend already sends image
+          populatedProduct?.images?.[0]?.url ||  // raw populated fallback
+          "https://via.placeholder.com/80",
+      };
+    })
+  : [],
+
       }));
 
       setOrders(formatted);
