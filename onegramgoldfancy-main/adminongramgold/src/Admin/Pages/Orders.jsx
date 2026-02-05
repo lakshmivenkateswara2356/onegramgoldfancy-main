@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAdmin } from "../../context/AdminContext";
 
-const CLOUDINARY_BASE =
-  "https://res.cloudinary.com/onegramgold/image/upload/";
+const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME"; // ⚠️ replace this
+const CLOUDINARY_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/`;
 
 const Orders = () => {
   const { orders = [], fetchOrders } = useAdmin();
@@ -47,24 +47,20 @@ const Orders = () => {
       fetchOrders();
 
       if (order.phone) {
-        const message = `
-Hi ${order.customer} 👋
-Your order is being prepared 🛍️
+        const message = `Hi ${order.customer} 👋
+Your order is shipped 🚚
 
 Order ID: ${order.id}
 Courier: ${trackingInfo.courier_name}
 Tracking ID: ${trackingInfo.tracking_id}
 
-Your order will be delivered soon 🙏
-        `;
+Thank you 🙏`;
 
         window.open(
           `https://wa.me/91${order.phone}?text=${encodeURIComponent(message)}`,
           "_blank"
         );
       }
-
-      alert("Tracking updated & WhatsApp opened");
     } catch (err) {
       console.error(err);
       alert("Error updating order");
@@ -84,17 +80,26 @@ Your order will be delivered soon 🙏
     }
   };
 
-  // ✅ FINAL, SAFE IMAGE HANDLER
-  const resolveImage = (item) => {
-    const img = item?.image || item?.product?.image;
+  // 🔥 PERFECT IMAGE HANDLER
+  const resolveImage = (image) => {
+    if (!image) return "https://via.placeholder.com/80";
 
-    if (!img) return "https://via.placeholder.com/80";
+    // case 1: image is object { url: "" }
+    if (typeof image === "object" && image.url) {
+      return image.url;
+    }
 
-    // Full URL (Cloudinary / CDN)
-    if (img.startsWith("http")) return img;
+    // case 2: already full URL
+    if (typeof image === "string" && image.startsWith("http")) {
+      return image;
+    }
 
-    // Cloudinary public_id only
-    return `${CLOUDINARY_BASE}${img}`;
+    // case 3: public_id only
+    if (typeof image === "string") {
+      return `${CLOUDINARY_BASE}${image}`;
+    }
+
+    return "https://via.placeholder.com/80";
   };
 
   return (
@@ -120,19 +125,19 @@ Your order will be delivered soon 🙏
 
               <p className="text-sm">📞 {o.phone}</p>
 
-              {/* ✅ PRODUCTS */}
+              {/* PRODUCTS */}
               <div className="space-y-2">
                 <p className="font-medium">Products:</p>
 
                 {o.items?.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <img
-                      src={resolveImage(item)}
+                      src={resolveImage(item.image)}
                       alt={item.name}
-                      className="w-12 h-12 object-cover rounded border"
                       onError={(e) => {
                         e.target.src = "https://via.placeholder.com/80";
                       }}
+                      className="w-12 h-12 object-cover rounded border"
                     />
                     <p className="text-sm">
                       {item.name} × {item.quantity}
