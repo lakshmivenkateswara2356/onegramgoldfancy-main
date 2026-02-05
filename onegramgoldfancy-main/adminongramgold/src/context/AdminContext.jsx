@@ -40,10 +40,10 @@ const AdminProvider = ({ children }) => {
         id: p.id || p._id,
 
         image:
-          Array.isArray(p.images) &&
-          p.images.length > 0 &&
-          p.images[0]?.url
-            ? p.images[0].url
+          Array.isArray(p.images) && p.images.length > 0
+            ? p.images[0]?.url
+            : typeof p.image === "string"
+            ? p.image
             : "https://via.placeholder.com/120",
 
         name: p.name || "Product",
@@ -86,7 +86,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS (✅ FIXED PRODUCT NAME & IMAGE)
+     ORDERS (✅ PRODUCT NAME & IMAGE FIX)
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -120,34 +120,36 @@ const AdminProvider = ({ children }) => {
         courier_name: o.courier_name || "",
 
         items: Array.isArray(o.items)
-  ? o.items.map((item) => {
-      const populatedProduct = item.product;
+          ? o.items.map((item) => {
+              /* ---------- PRODUCT RESOLUTION ---------- */
 
-      const fallbackProduct = products.find(
-        (p) =>
-          String(p.id) === String(item.product_id) ||
-          String(p._id) === String(item.product_id)
-      );
+              // 1️⃣ populated product from backend
+              const populated = item.product;
 
-      const finalProduct = populatedProduct || fallbackProduct;
+              // 2️⃣ fallback from products list
+              const fallback = products.find(
+                (p) =>
+                  String(p.id) === String(item.product_id) ||
+                  String(p._id) === String(item.product_id)
+              );
 
-      return {
-        quantity: item.quantity || 1,
-        name:
-          finalProduct?.name ||
-          populatedProduct?.name ||
-          "Product",
+              const product = populated || fallback || {};
 
-        // ✅ FIXED IMAGE RESOLUTION
-        image:
-          finalProduct?.image ||                // from products state
-          populatedProduct?.image ||             // if backend already sends image
-          populatedProduct?.images?.[0]?.url ||  // raw populated fallback
-          "https://via.placeholder.com/80",
-      };
-    })
-  : [],
+              /* ---------- IMAGE RESOLUTION ---------- */
+              const image =
+                Array.isArray(product.images) && product.images.length > 0
+                  ? product.images[0]?.url
+                  : typeof product.image === "string"
+                  ? product.image
+                  : "https://via.placeholder.com/80";
 
+              return {
+                quantity: item.quantity || 1,
+                name: product.name || "Product",
+                image,
+              };
+            })
+          : [],
       }));
 
       setOrders(formatted);
