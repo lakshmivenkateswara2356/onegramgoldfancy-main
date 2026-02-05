@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAdmin } from "../../context/AdminContext";
 
 const CLOUDINARY_BASE =
-  "https://res.cloudinary.com/<your-cloud-name>/image/upload/";
+  "https://res.cloudinary.com/onegramgold/image/upload/";
 
 const Orders = () => {
   const { orders = [], fetchOrders } = useAdmin();
@@ -84,10 +84,16 @@ Your order will be delivered soon 🙏
     }
   };
 
-  // ✅ Proper Cloudinary helper
-  const getCloudinaryImage = (img) => {
+  // ✅ FINAL, SAFE IMAGE HANDLER
+  const resolveImage = (item) => {
+    const img = item?.image || item?.product?.image;
+
     if (!img) return "https://via.placeholder.com/80";
+
+    // Full URL (Cloudinary / CDN)
     if (img.startsWith("http")) return img;
+
+    // Cloudinary public_id only
     return `${CLOUDINARY_BASE}${img}`;
   };
 
@@ -118,24 +124,21 @@ Your order will be delivered soon 🙏
               <div className="space-y-2">
                 <p className="font-medium">Products:</p>
 
-                {o.items?.map((item, i) => {
-                  const productImage = getCloudinaryImage(
-                    item.image || item.product?.image
-                  );
-
-                  return (
-                    <div key={i} className="flex items-center gap-3">
-                      <img
-                        src={productImage}
-                        alt={item.name}
-                        className="w-12 h-12 object-cover rounded border"
-                      />
-                      <p className="text-sm">
-                        {item.name} × {item.quantity}
-                      </p>
-                    </div>
-                  );
-                })}
+                {o.items?.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <img
+                      src={resolveImage(item)}
+                      alt={item.name}
+                      className="w-12 h-12 object-cover rounded border"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/80";
+                      }}
+                    />
+                    <p className="text-sm">
+                      {item.name} × {item.quantity}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <p className="text-sm">📍 {o.address}</p>
