@@ -1,10 +1,58 @@
-// 
-
 const pool = require("../config/db");
+const axios = require("axios");
+
+/* =====================================================
+   WHATSAPP SENDER (INTERNAL FUNCTION)
+===================================================== */
+const sendWhatsAppMessage = async (order, items) => {
+  try {
+    const message = `
+🛍️ *New Order Placed*
+
+👤 Name: ${order.customer_name}
+📞 Phone: ${order.phone}
+
+📦 Products:
+${items.length > 0
+  ? items
+      .map(
+        (item, index) =>
+          `${index + 1}. ${item.name}
+Qty: ${item.quantity}
+Price: ₹${item.price * item.quantity}`
+      )
+      .join("\n\n")
+  : "Gold Order"}
+
+💰 Total: ₹${order.total_amount}
+💵 Payment: Cash on Delivery
+
+📍 Address:
+${order.address}
+`;
+
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: order.phone, // must include country code (91XXXXXXXXXX)
+        type: "text",
+        text: { body: message },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (err) {
+    console.error("WHATSAPP ERROR:", err.message);
+  }
+};
 
 /* =====================================================
    USER – CREATE ORDER
-   (Supports both grams-only & cart items)
 ===================================================== */
 exports.addOrder = async (req, res) => {
   const client = await pool.connect();
@@ -13,7 +61,7 @@ exports.addOrder = async (req, res) => {
     const userId = req.user.id;
     const {
       grams,
-      items = [],       // optional (for cart-based orders)
+      items = [],
       total_amount,
       address,
       customer_name,
@@ -37,7 +85,7 @@ exports.addOrder = async (req, res) => {
 
     const order = orderResult.rows[0];
 
-    // 2️⃣ Insert order items (ONLY if items exist)
+    // 2️⃣ Insert order items
     if (Array.isArray(items) && items.length > 0) {
       for (const item of items) {
         await client.query(
@@ -57,6 +105,9 @@ exports.addOrder = async (req, res) => {
     }
 
     await client.query("COMMIT");
+
+    // 3️⃣ SEND WHATSAPP MESSAGE (AFTER COMMIT)
+    await sendWhatsAppMessage(order, items);
 
     res.status(201).json(order);
   } catch (err) {
@@ -111,7 +162,7 @@ exports.getOrders = async (req, res) => {
 };
 
 /* =====================================================
-   ADMIN – GET ALL ORDERS (WITH PRODUCTS)
+   ADMIN – GET ALL ORDERS
 ===================================================== */
 exports.getAllOrders = async (req, res) => {
   try {
