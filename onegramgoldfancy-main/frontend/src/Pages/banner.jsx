@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const BannerCarousel = () => {
   const { banners, loadingBanners } = useContext(AppContext);
   const [current, setCurrent] = useState(0);
   const startX = useRef(0);
+  const navigate = useNavigate();
 
   /* ================= AUTO SLIDE ================= */
   useEffect(() => {
@@ -69,13 +71,18 @@ const BannerCarousel = () => {
                         {banner.title}
                       </h2>
                     )}
+
                     {banner.paragraph && (
                       <p className="text-xs sm:text-sm md:text-lg text-gray-200">
                         {banner.paragraph}
                       </p>
                     )}
+
                     {banner.button_text && (
-                      <button className="mt-1 w-fit px-4 py-1.5 rounded-full bg-yellow-400 text-black text-xs md:text-base font-semibold hover:bg-yellow-500 transition">
+                      <button
+                        onClick={() => navigate("/products")}
+                        className="mt-1 w-fit px-4 py-1.5 rounded-full bg-yellow-400 text-black text-xs md:text-base font-semibold hover:bg-yellow-500 transition"
+                      >
                         {banner.button_text}
                       </button>
                     )}
