@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAdmin } from "../../context/AdminContext";
 
-const CLOUDINARY_BASE = "https://res.cloudinary.com/<your-cloud-name>/image/upload/";
+const CLOUDINARY_BASE =
+  "https://res.cloudinary.com/<your-cloud-name>/image/upload/";
 
 const Orders = () => {
   const { orders = [], fetchOrders } = useAdmin();
@@ -83,12 +84,10 @@ Your order will be delivered soon 🙏
     }
   };
 
-  // ✅ Helper to get full Cloudinary image URL
+  // ✅ Proper Cloudinary helper
   const getCloudinaryImage = (img) => {
     if (!img) return "https://via.placeholder.com/80";
-    // If already full URL, return it
     if (img.startsWith("http")) return img;
-    // Otherwise, append to Cloudinary base
     return `${CLOUDINARY_BASE}${img}`;
   };
 
@@ -115,22 +114,28 @@ Your order will be delivered soon 🙏
 
               <p className="text-sm">📞 {o.phone}</p>
 
-              {/* ✅ PRODUCTS WITH CLOUDINARY IMAGE */}
+              {/* ✅ PRODUCTS */}
               <div className="space-y-2">
                 <p className="font-medium">Products:</p>
 
-                {o.items?.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <img
-                      src={getCloudinaryImage(item.image)}
-                      alt={item.name}
-                      className="w-12 h-12 object-cover rounded border"
-                    />
-                    <p className="text-sm">
-                      {item.name} × {item.quantity}
-                    </p>
-                  </div>
-                ))}
+                {o.items?.map((item, i) => {
+                  const productImage = getCloudinaryImage(
+                    item.image || item.product?.image
+                  );
+
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <img
+                        src={productImage}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded border"
+                      />
+                      <p className="text-sm">
+                        {item.name} × {item.quantity}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
 
               <p className="text-sm">📍 {o.address}</p>

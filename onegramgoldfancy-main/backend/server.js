@@ -25,6 +25,8 @@ app.use(
     "https://onegramgoldfancy.vercel.app",
     "https://onegramgoldfancyadmin.vercel.app",
     "http://localhost:3000",
+    "http://localhost:3001"
+
    
   ], // replace with frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],
