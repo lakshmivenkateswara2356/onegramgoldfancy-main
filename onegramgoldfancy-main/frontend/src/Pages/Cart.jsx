@@ -24,7 +24,9 @@ const Cart = () => {
     0
   );
 
-  // Fetch user address from DB
+  /* ============================
+     FETCH USER ADDRESS
+  ============================ */
   useEffect(() => {
     const fetchAddress = async () => {
       const token = localStorage.getItem("token");
@@ -50,7 +52,9 @@ const Cart = () => {
     fetchAddress();
   }, [user]);
 
-  // Save address to DB
+  /* ============================
+     SAVE ADDRESS
+  ============================ */
   const saveAddress = async () => {
     if (!guest.name || !guest.phone || !guest.address) {
       return toast.error("Please fill all delivery details");
@@ -72,12 +76,53 @@ const Cart = () => {
       toast.success("Address saved to DB ✅");
       setIsEditingAddress(false);
     } catch (err) {
-      console.error("Failed to save address:", err);
       toast.error("Failed to save address ❌");
     }
   };
 
-  // Place order
+  /* ============================
+     SEND WHATSAPP TO ADMIN
+  ============================ */
+  const sendWhatsAppToAdmin = () => {
+    const adminNumber = "917842802368"; // +91 7842802368
+
+    const productDetails = cart
+      .map(
+        (item, index) => `
+${index + 1}. ${item.name}
+Qty: ${item.quantity}
+Price: ₹${item.price}
+Image: ${item.image || "N/A"}
+`
+      )
+      .join("\n");
+
+    const message = `
+🛒 *NEW ORDER RECEIVED*
+
+👤 Name: ${guest.name}
+📞 Phone: ${guest.phone}
+📍 Address: ${guest.address}
+
+📦 *Products*
+${productDetails}
+
+💰 *Total Amount*: ₹${subtotal}
+`
+
+;
+
+
+    const whatsappURL = `https://wa.me/${adminNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    window.open(whatsappURL, "_blank");
+  };
+
+  /* ============================
+     PLACE ORDER
+  ============================ */
   const confirmOrder = async () => {
     if (!guest.name || !guest.phone || !guest.address)
       return toast.error("Please fill delivery details");
@@ -89,7 +134,7 @@ const Cart = () => {
     setLoading(true);
 
     try {
-      // Save address to DB before order
+      // Save address
       await axios.put(
         `${API}/users/address`,
         {
@@ -120,11 +165,13 @@ const Cart = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // ✅ WhatsApp Admin
+      sendWhatsAppToAdmin();
+
       clearCart();
       toast.success("Order placed successfully 🎉");
       navigate("/order-success");
     } catch (err) {
-      console.error("Order error:", err);
       toast.error("Order failed ❌");
     } finally {
       setLoading(false);
@@ -149,11 +196,11 @@ const Cart = () => {
             <div className="bg-white rounded-xl p-10 text-center shadow-sm">
               <p className="text-gray-500">Your cart is empty</p>
               <button
-        onClick={() => navigate("/")} // or use router Link
-        className="px-6 py-2 bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white rounded-lg hover:opacity-90 transition"
-      >
-        Back to Shopping
-      </button>
+                onClick={() => navigate("/")}
+                className="mt-4 px-6 py-2 bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white rounded-lg"
+              >
+                Back to Shopping
+              </button>
             </div>
           ) : (
             <div className="space-y-6">
@@ -194,7 +241,7 @@ const Cart = () => {
 
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="text-gray-400 hover:text-red-500 transition"
+                    className="text-gray-400 hover:text-red-500"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -208,35 +255,23 @@ const Cart = () => {
         <div className="bg-white rounded-2xl p-6 shadow-md h-fit">
           <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-          <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-            Delivery Address
-          </p>
-
           {!guest.address || isEditingAddress ? (
             <div className="space-y-3">
               <input
                 placeholder="Full Name"
                 value={guest.name}
                 onChange={(e) =>
-                  setGuest((prev) => ({ ...prev, name: e.target.value }))
+                  setGuest({ ...guest, name: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
               />
 
               <PhoneInput
                 country={"in"}
-                value={guest.phone || ""}
+                value={guest.phone}
                 onChange={(phone) =>
-                  setGuest((prev) => ({ ...prev, phone }))
+                  setGuest({ ...guest, phone })
                 }
-                onlyCountries={["in", "us", "ae", "gb"]}
-                enableSearch
-                countryCodeEditable={false}
-                inputProps={{
-                  name: "phone",
-                  required: true,
-                  autoFocus: false,
-                }}
                 inputClass="w-full border rounded-lg px-3 py-2"
               />
 
@@ -244,14 +279,14 @@ const Cart = () => {
                 placeholder="Full Address"
                 value={guest.address}
                 onChange={(e) =>
-                  setGuest((prev) => ({ ...prev, address: e.target.value }))
+                  setGuest({ ...guest, address: e.target.value })
                 }
                 className="w-full border rounded-lg px-3 py-2"
               />
 
               <button
                 onClick={saveAddress}
-                className="text-sm text-indigo-500 font-medium"
+                className="text-indigo-500 text-sm font-medium"
               >
                 Save Address
               </button>
@@ -261,7 +296,7 @@ const Cart = () => {
               <p>{guest.address}</p>
               <button
                 onClick={() => setIsEditingAddress(true)}
-                className="text-indigo-500 text-sm mt-1 font-medium"
+                className="text-indigo-500 text-sm font-medium mt-1"
               >
                 Change
               </button>
@@ -278,10 +313,10 @@ const Cart = () => {
           <button
             onClick={confirmOrder}
             disabled={loading}
-            className={`w-full mt-6 py-3 rounded-xl text-white font-medium transition ${
+            className={`w-full mt-6 py-3 rounded-xl text-white ${
               loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] hover:opacity-90"
+                ? "bg-gray-400"
+                : "bg-gradient-to-r from-[#C9A24D] to-[#B08A2E]"
             }`}
           >
             {loading ? "Placing Order..." : "Place Order"}

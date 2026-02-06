@@ -53,11 +53,12 @@ Your order is shipped 🚚
 Order ID: ${order.id}
 Courier: ${trackingInfo.courier_name}
 Tracking ID: ${trackingInfo.tracking_id}
+Track your order here:https://onegramgoldfancy.vercel.app/orders
 
 Thank you 🙏`;
 
         window.open(
-          `https://wa.me/91${order.phone}?text=${encodeURIComponent(message)}`,
+          `https://wa.me/${order.phone}?text=${encodeURIComponent(message)}`,
           "_blank"
         );
       }
