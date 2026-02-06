@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useAdmin } from "../../context/AdminContext";
 
+
 import AdminLogout from "./AdminLogout";
 
 const Dashboard = () => {
@@ -12,6 +13,8 @@ const Dashboard = () => {
   }, [fetchOrders]);
 
   const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+  const { customers } = useAdmin();
+
   const recentOrders = orders.slice(0, 3); // ✅ Only show 3 most recent orders
 
   return (
@@ -37,7 +40,10 @@ const Dashboard = () => {
         </div>
         <div className="bg-white rounded-xl shadow-md p-5 hover:shadow-xl transition-shadow">
           <p className="text-gray-500 text-sm">Customers</p>
-          <h2 className="text-2xl font-semibold mt-1">—</h2>
+         <h2 className="text-2xl font-semibold mt-1">
+  {customers.length}
+</h2>
+
         </div>
       </div>
 

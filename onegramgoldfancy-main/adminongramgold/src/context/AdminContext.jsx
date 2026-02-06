@@ -86,7 +86,7 @@ const AdminProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     ORDERS (✅ PRODUCT NAME & IMAGE FIX)
+     ORDERS (✅ FIXED PRODUCT NAME & IMAGE)
   ===================================================== */
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -121,31 +121,44 @@ const AdminProvider = ({ children }) => {
 
         items: Array.isArray(o.items)
           ? o.items.map((item) => {
-              /* ---------- PRODUCT RESOLUTION ---------- */
+              /* ===============================
+                 ✅ CORRECT PRODUCT RESOLUTION
+              =============================== */
 
-              // 1️⃣ populated product from backend
-              const populated = item.product;
+              // 1️⃣ Use ordered product data FIRST
+              const directName = item.name;
+              const directImage =
+                item.image ||
+                (Array.isArray(item.images) && item.images[0]?.url);
 
-              // 2️⃣ fallback from products list
-              const fallback = products.find(
-                (p) =>
-                  String(p.id) === String(item.product_id) ||
-                  String(p._id) === String(item.product_id)
-              );
+              // 2️⃣ Populated product (if backend populated)
+              const populated = item.product || {};
 
-              const product = populated || fallback || {};
+              // 3️⃣ Fallback from products list
+              const fallback =
+                products.find(
+                  (p) =>
+                    String(p.id) === String(item.product_id) ||
+                    String(p._id) === String(item.product_id)
+                ) || {};
 
-              /* ---------- IMAGE RESOLUTION ---------- */
+              const name =
+                directName ||
+                populated.name ||
+                fallback.name ||
+                "Product";
+
               const image =
-                Array.isArray(product.images) && product.images.length > 0
-                  ? product.images[0]?.url
-                  : typeof product.image === "string"
-                  ? product.image
-                  : "https://via.placeholder.com/80";
+                directImage ||
+                (Array.isArray(populated.images) &&
+                  populated.images[0]?.url) ||
+                populated.image ||
+                fallback.image ||
+                "https://via.placeholder.com/80";
 
               return {
                 quantity: item.quantity || 1,
-                name: product.name || "Product",
+                name,
                 image,
               };
             })
@@ -159,6 +172,22 @@ const AdminProvider = ({ children }) => {
       setLoadingOrders(false);
     }
   }, [products]);
+
+
+  const customers = Array.from(
+    new Map(
+      orders
+        .filter((o) => o.phone) // unique by phone
+        .map((o) => [
+          o.phone,
+          {
+            name: o.customer,
+            phone: o.phone,
+            address: o.address,
+          },
+        ])
+    ).values()
+  );
 
   /* =====================================================
      INITIAL LOAD (ORDER MATTERS)
@@ -197,6 +226,7 @@ const AdminProvider = ({ children }) => {
         loadingOrders,
         fetchOrders,
         setOrders,
+        customers,
       }}
     >
       {children}
