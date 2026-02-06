@@ -8,14 +8,11 @@ import AdminProvider from "./context/AdminContext";
 import AdminLogin from "./Admin/Pages/Login";
 import Dashboard from "./Admin/Pages/Dashboard";
 import Products from "./Admin/Pages/Products";
-import Categories from "./Admin/Pages/Categories";
 import Orders from "./Admin/Pages/Orders";
 import Customers from "./Admin/Pages/Customers";
-import Offers from "./Admin/Pages/Offers";
-import Inventory from "./Admin/Pages/Inventory";
+
 import Banners from "./Admin/Pages/Banners";
-import Reports from "./Admin/Pages/Reports";
-import Settings from "./Admin/Pages/Settings";
+
 
 // Components
 import AdminProtectedRoute from "./Admin/Components/AdminProtectedRoute";
