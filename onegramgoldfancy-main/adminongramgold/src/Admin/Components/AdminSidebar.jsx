@@ -3,14 +3,11 @@ import { NavLink } from "react-router-dom";
 const links = [
   ["Dashboard", "/admin"],
   ["Products", "/admin/products"],
-  ["Categories", "/admin/categories"],
   ["Orders", "/admin/orders"],
   ["Customers", "/admin/customers"],
-  ["Offers", "/admin/offers"],
-  ["Inventory", "/admin/inventory"],
+  
   ["Banners", "/admin/banners"],
-  ["Reports", "/admin/reports"],
-  ["Settings", "/admin/settings"],
+ 
 ];
 
 const AdminSidebar = () => (
