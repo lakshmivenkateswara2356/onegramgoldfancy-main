@@ -22,7 +22,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-    "https://onegramgoldfancy.vercel.app",
+    "https://amalapuramammayisri.com",
     "https://onegramgoldfancyadmin.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001"
