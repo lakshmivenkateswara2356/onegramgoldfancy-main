@@ -53,7 +53,7 @@ Your order is shipped 🚚
 Order ID: ${order.id}
 Courier: ${trackingInfo.courier_name}
 Tracking ID: ${trackingInfo.tracking_id}
-Track your order here:https://onegramgoldfancy.vercel.app/orders
+Track your order here:https://amalapuramammayisri.com/orders
 
 Thank you 🙏`;
 
