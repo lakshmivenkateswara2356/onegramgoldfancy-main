@@ -73,7 +73,7 @@ const Cart = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Address saved to DB ✅");
+      toast.success("Address updated successfully");
       setIsEditingAddress(false);
     } catch (err) {
       toast.error("Failed to save address ❌");
@@ -84,7 +84,7 @@ const Cart = () => {
      SEND WHATSAPP TO ADMIN
   ============================ */
   const sendWhatsAppToAdmin = () => {
-    const adminNumber = "917842802368"; // +91 7842802368
+    const adminNumber = "918179045317"; // +91 7842802368
 
     const productDetails = cart
       .map(

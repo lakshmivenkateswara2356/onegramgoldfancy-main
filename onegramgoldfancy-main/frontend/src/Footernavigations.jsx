@@ -8,7 +8,7 @@ const Footernavigations = () => {
      ${isActive ? "text-yellow-400" : "text-gray-400"}`;
 
   return (
-    <footer className="fixed bottom-0 w-full h-[60px] bg-black flex justify-around items-center border-t border-gray-800 z-50">
+    <footer className="fixed bottom-0 w-full h-[60px] bg-black flex justify-around lg:hidden items-center border-t border-gray-800 z-50">
       <NavLink to="/" className={linkClasses}>
         <Home size={22} />
         <span>Home</span>

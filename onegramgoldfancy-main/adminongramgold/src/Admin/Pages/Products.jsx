@@ -39,7 +39,8 @@ const Products = () => {
             : 0;
 
         return {
-          id: p.id,
+          id: p.id ?? p.product_id ?? p.uuid,
+
           name: p.name,
           category: p.category,
           price: priceNum,

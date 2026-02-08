@@ -1,0 +1,114 @@
+
+
+/* Page background */
+.about-wrapper {
+  position: relative;
+  background-color: #000;
+  color: #e6d8a8;
+  overflow: hidden;
+}
+
+/* Floating chain stays same */
+.floating-chain {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* All sections center aligned */
+.section {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px;
+  text-align: center;
+  position: relative;
+}
+
+/* Content wrapper */
+.section-content {
+  max-width: 900px;
+}
+
+/* Headings */
+.section h2 {
+  font-size: 44px;
+  margin-bottom: 20px;
+  color: #d4af37; /* Gold */
+  letter-spacing: 1px;
+}
+
+/* Paragraphs */
+.section p {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #f3e5b5;
+  margin-bottom: 16px;
+}
+
+
+
+/* Luxury glow effect */
+.section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(212, 175, 55, 0.08),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Section One – Left aligned */
+.section.one {
+  justify-content: flex-start;
+  text-align: left;
+  padding-left: 120px;
+}
+
+/* Limit width so it looks premium */
+.section.one .section-content {
+  max-width: 600px;
+}
+
+/* Responsive fix */
+@media (max-width: 768px) {
+  .section.one {
+    justify-content: center;
+    padding-left: 20px;
+    text-align: center;
+  }
+}
+
+/* Section Two – Right aligned */
+.section.two {
+  justify-content: flex-end;
+  text-align: right;
+  padding-right: 120px;
+}
+
+/* Limit width for luxury look */
+.section.two .section-content {
+  max-width: 600px;
+}
+
+/* Mobile fix */
+@media (max-width: 768px) {
+  .section.two {
+    justify-content: center;
+    padding-right: 20px;
+    text-align: center;
+  }
+}
+
+.section-content img {
+  width: 500px;
+}
+
