@@ -171,13 +171,13 @@ const Products = () => {
             required
           />
           <input
-            name="category"
-            placeholder="Category"
-            value={form.category}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2"
-            required
-          />
+  name="category"
+  placeholder="Category (e.g. Rings, Chains)"
+  value={form.category}
+  onChange={handleChange}
+  required
+/>
+
           <input
             type="number"
             name="price"

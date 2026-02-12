@@ -3,7 +3,11 @@ const pool = require("../config/db");
 // ➕ ADD TO WISHLIST
 exports.addToWishlist = async (req, res) => {
   const userId = req.user.id;
-  const { productId } = req.params;
+  const { productId } = req.body; // ✅ FIXED
+
+  if (!productId) {
+    return res.status(400).json({ message: "Product ID required" });
+  }
 
   try {
     await pool.query(
@@ -30,7 +34,6 @@ exports.getWishlist = async (req, res) => {
       [userId]
     );
 
-    // send only product IDs
     res.json(result.rows.map(r => r.product_id));
   } catch (err) {
     console.error(err);

@@ -7,13 +7,12 @@ const {
   removeFromWishlist,
 } = require("../controllers/wishlist.controller");
 
-// GET wishlist
 router.get("/", auth, getWishlist);
 
-// ADD to wishlist
-router.post("/:productId", auth, addToWishlist);
+// ✅ productId comes from BODY now
+router.post("/", auth, addToWishlist);
 
-// REMOVE from wishlist
+// remove stays same
 router.delete("/:productId", auth, removeFromWishlist);
 
 module.exports = router;

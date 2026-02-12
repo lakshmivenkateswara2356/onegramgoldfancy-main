@@ -1,10 +1,7 @@
 import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import goldring from "../Assets/rings.webp";
-import chain from "../Assets/goldchains.jpg";
-import pendent from "../Assets/pendent.jpg";
-import WelcomeModal from "../Pages/WelcomeModal"; // ✅ Import WelcomeModal
+import WelcomeModal from "../Pages/WelcomeModal";
 
 export const AppContext = createContext(null);
 
@@ -18,22 +15,18 @@ const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // ✅ Welcome modal state
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
-
-      // ✅ Show welcome modal on first login
-      const isFirstLogin = !localStorage.getItem("welcomeShown");
-      if (isFirstLogin) {
+      if (!localStorage.getItem("welcomeShown")) {
         setShowWelcomeModal(true);
         localStorage.setItem("welcomeShown", "true");
       }
     } else {
       localStorage.removeItem("user");
-      localStorage.removeItem("welcomeShown"); // reset on logout
+      localStorage.removeItem("welcomeShown");
     }
   }, [user]);
 
@@ -86,69 +79,18 @@ const AppProvider = ({ children }) => {
     localStorage.removeItem("cart");
   };
 
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ------------------ WISHLIST (Postgres) ------------------ */
-  const [wishlist, setWishlist] = useState([]);
-  const API = "https://onegramgoldfancy-main.onrender.com/api";
-
-  const fetchWishlist = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token || !user) return;
-
-    try {
-      const res = await axios.get(`${API}/wishlist`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const ids = Array.isArray(res.data) ? res.data : [];
-      setWishlist(ids);
-    } catch (err) {
-      console.error("Failed to fetch wishlist:", err);
-      toast.error("Failed to fetch wishlist");
-    }
-  }, [API, user]);
-
-  const toggleWishlist = async (productId) => {
-    const token = localStorage.getItem("token");
-    if (!token || !user) {
-      toast.error("Please login to manage favorites ❤️");
-      return;
-    }
-
-    try {
-      if (wishlist.includes(productId)) {
-        await axios.delete(`${API}/wishlist/${productId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setWishlist((prev) => prev.filter((id) => id !== productId));
-        toast.success("Removed from favorites ❤️");
-      } else {
-        await axios.post(
-          `${API}/wishlist/${productId}`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setWishlist((prev) => [...prev, productId]);
-        toast.success("Added to favorites ❤️");
-      }
-    } catch (err) {
-      console.error("Wishlist update failed:", err);
-      toast.error("Failed to update favorites");
-    }
-  };
-
-  useEffect(() => {
-    if (user) fetchWishlist();
-    else setWishlist([]);
-  }, [user, fetchWishlist]);
-
   /* ------------------ PRODUCTS ------------------ */
   const [products, setProducts] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [miniProducts, setMiniProducts] = useState([]);
+
+  const API = "https://onegramgoldfancy-main.onrender.com/api";
 
   const fetchProducts = async () => {
     try {
@@ -156,12 +98,22 @@ const AppProvider = ({ children }) => {
       const res = await axios.get(`${API}/products`);
       const data = res.data || [];
 
-      const grouped = data.reduce((acc, product) => {
-        const cat = product.category?.toLowerCase().replace(/\s+/g, "-");
-        if (!acc[cat]) acc[cat] = [];
+      const grouped = {};
+      const categoriesMap = {};
 
-        acc[cat].push({
+      data.forEach((product) => {
+        const slug = product.category
+          ?.toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-");
+
+        if (!slug) return;
+
+        if (!grouped[slug]) grouped[slug] = [];
+
+        const formatted = {
           ...product,
+          categorySlug: slug,
           price: Number(product.price) || 0,
           oldPrice: product.old_price ? Number(product.old_price) : null,
           discount:
@@ -176,12 +128,22 @@ const AppProvider = ({ children }) => {
             Array.isArray(product.images) && product.images.length > 0
               ? product.images[0]
               : "https://via.placeholder.com/120",
-        });
+        };
 
-        return acc;
-      }, {});
+        grouped[slug].push(formatted);
+
+        if (!categoriesMap[slug]) {
+          categoriesMap[slug] = {
+            id: slug,
+            name: product.category,
+            category: slug,
+            image: formatted.image,
+          };
+        }
+      });
 
       setProducts(grouped);
+      setMiniProducts(Object.values(categoriesMap));
     } catch (err) {
       console.error("Failed to fetch products:", err);
     } finally {
@@ -193,21 +155,69 @@ const AppProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  /* ------------------ MINI PRODUCTS ------------------ */
-  const [miniProducts, setMiniProducts] = useState([]);
+  /* ------------------ WISHLIST (FIXED) ------------------ */
+  const [wishlist, setWishlist] = useState([]);
+
+  const fetchWishlist = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) return;
+
+    try {
+      const res = await axios.get(`${API}/wishlist`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Expect backend to return full products or IDs
+      const serverWishlist = Array.isArray(res.data) ? res.data : [];
+
+      // Map IDs to full product objects if needed
+      const allProducts = Object.values(products).flat();
+
+      const normalized = serverWishlist
+        .map((item) =>
+          typeof item === "object"
+            ? item
+            : allProducts.find((p) => p.id === item)
+        )
+        .filter(Boolean);
+
+      setWishlist(normalized);
+    } catch {
+      toast.error("Failed to fetch wishlist");
+    }
+  }, [API, user, products]);
+
+  const toggleWishlist = async (product) => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) {
+      toast.error("Please login ❤️");
+      return;
+    }
+
+    const exists = wishlist.some((p) => p.id === product.id);
+
+    try {
+      if (exists) {
+        await axios.delete(`${API}/wishlist/${product.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setWishlist((prev) => prev.filter((p) => p.id !== product.id));
+      } else {
+        await axios.post(
+          `${API}/wishlist/${product.id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setWishlist((prev) => [...prev, product]);
+      }
+    } catch {
+      toast.error("Wishlist update failed");
+    }
+  };
 
   useEffect(() => {
-    setMiniProducts([
-      { id: 1, name: "Gold Ring", category: "one-gram-gold", image: goldring },
-      { id: 2, name: "Gold Chain", category: "one-gram-gold", image: chain },
-      {
-        id: 3,
-        name: "Panchalohalu Pendant",
-        category: "panchalohalu",
-        image: pendent,
-      },
-    ]);
-  }, []);
+    user ? fetchWishlist() : setWishlist([]);
+  }, [user, fetchWishlist]);
 
   /* ------------------ BANNERS ------------------ */
   const [banners, setBanners] = useState(() => {
@@ -241,7 +251,6 @@ const AppProvider = ({ children }) => {
       if (exists) return prev;
       return [...prev, { ...product, quantity: 1 }];
     });
-
     toast.success("Proceeding to checkout 💳");
     navigate("/cart");
   };
@@ -273,7 +282,6 @@ const AppProvider = ({ children }) => {
     >
       {children}
 
-      {/* ✅ Welcome Modal */}
       {showWelcomeModal && (
         <WelcomeModal
           userName={user?.name || "User"}

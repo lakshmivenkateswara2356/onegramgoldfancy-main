@@ -7,51 +7,43 @@ import Footernavigations from "../Footernavigations";
 import toast from "react-hot-toast";
 
 const Favorites = () => {
-  const { products, wishlist, toggleWishlist, addToCart, user } =
+  const { wishlist, toggleWishlist, addToCart, user } =
     useContext(AppContext);
+
   const navigate = useNavigate();
-
-  const allProducts = [
-    ...(products?.panchalohalu || []),
-    ...(products?.["one-gram-gold"] || []),
-  ];
-
-  const favoriteProducts = allProducts.filter((product) =>
-    wishlist.includes(product.id)
-  );
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
       <Navbar />
 
       <div className="pt-20 px-4 max-w-7xl mx-auto">
+        {/* Back Button */}
         <button
-  onClick={() => navigate(-1)}
-  className="flex items-center px-3 py-1.5 bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white text-sm font-medium rounded-full shadow-sm hover:shadow-md hover:opacity-90 transition-all duration-300"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-4 w-4 mr-1"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-  </svg>
-  Back
-</button>
-
+          onClick={() => navigate(-1)}
+          className="flex items-center px-3 py-1.5 mb-4 bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] text-white text-sm font-medium rounded-full shadow-sm hover:shadow-md transition-all"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
 
         <h1 className="text-2xl font-bold mb-6">My Favorites ❤️</h1>
 
-        {favoriteProducts.length === 0 ? (
+        {wishlist.length === 0 ? (
           <p className="text-center text-gray-500">
             No favorite products yet
           </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-            {favoriteProducts.map((product) => (
+            {wishlist.map((product) => (
               <div
                 key={product.id}
                 className="bg-white rounded-2xl shadow-sm overflow-hidden"
@@ -62,13 +54,15 @@ const Favorites = () => {
                     alt={product.name}
                     className="h-44 w-full object-cover"
                   />
+
+                  {/* Remove from wishlist */}
                   <button
                     onClick={() => {
                       if (!user) {
                         toast.error("Login to manage wishlist ❤️");
                         return;
                       }
-                      toggleWishlist(product.id);
+                      toggleWishlist(product);
                     }}
                     className="absolute top-3 right-3 bg-white p-2 rounded-full shadow"
                   >
@@ -100,6 +94,7 @@ const Favorites = () => {
           </div>
         )}
       </div>
+
       <Footernavigations />
     </div>
   );

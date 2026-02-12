@@ -18,6 +18,7 @@ import Orders from "./Pages/Orders";
 import OrderSuccess from "./Pages/OrderSuccess";
 import AllProducts from "./Pages/AllProducts";
 import CategoryProducts from "./Pages/CategoryProducts";
+import CategoryPage from "./Pages/CategoryPage";
 import AboutPage from "./Components/Aboutpage/AboutPage";
 
 // ---------- UTILS ----------
@@ -58,6 +59,7 @@ const App = () => {
         <Route path="/products" element={<AllProducts />} />
         <Route path="/category" element={<CategoryProducts />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
 
 
         <Route
