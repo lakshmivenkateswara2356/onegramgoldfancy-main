@@ -155,7 +155,7 @@ const AppProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  /* ------------------ WISHLIST (FIXED) ------------------ */
+  /* ------------------ ❤️ WISHLIST (ONLY FIXED PART) ------------------ */
   const [wishlist, setWishlist] = useState([]);
 
   const fetchWishlist = useCallback(async () => {
@@ -167,50 +167,41 @@ const AppProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Expect backend to return full products or IDs
-      const serverWishlist = Array.isArray(res.data) ? res.data : [];
-
-      // Map IDs to full product objects if needed
-      const allProducts = Object.values(products).flat();
-
-      const normalized = serverWishlist
-        .map((item) =>
-          typeof item === "object"
-            ? item
-            : allProducts.find((p) => p.id === item)
-        )
-        .filter(Boolean);
-
-      setWishlist(normalized);
+      setWishlist(Array.isArray(res.data) ? res.data : []);
     } catch {
       toast.error("Failed to fetch wishlist");
     }
-  }, [API, user, products]);
+  }, [user]);
 
-  const toggleWishlist = async (product) => {
+  const toggleWishlist = async (productId) => {
     const token = localStorage.getItem("token");
+
     if (!token || !user) {
       toast.error("Please login ❤️");
       return;
     }
 
-    const exists = wishlist.some((p) => p.id === product.id);
-
     try {
-      if (exists) {
-        await axios.delete(`${API}/wishlist/${product.id}`, {
+      if (wishlist.includes(productId)) {
+        await axios.delete(`${API}/wishlist/${productId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setWishlist((prev) => prev.filter((p) => p.id !== product.id));
+
+        setWishlist((prev) => prev.filter((id) => id !== productId));
+        toast.success("Removed from favorites");
       } else {
+        // ✅ FIX: POST without :id
         await axios.post(
-          `${API}/wishlist/${product.id}`,
-          {},
+          `${API}/wishlist`,
+          { productId },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setWishlist((prev) => [...prev, product]);
+
+        setWishlist((prev) => [...prev, productId]);
+        toast.success("Added to favorites ❤️");
       }
-    } catch {
+    } catch (err) {
+      console.error("Wishlist error:", err.response?.data || err.message);
       toast.error("Wishlist update failed");
     }
   };
