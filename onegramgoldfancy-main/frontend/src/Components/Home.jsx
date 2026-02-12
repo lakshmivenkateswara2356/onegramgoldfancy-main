@@ -6,7 +6,6 @@ import Footer from "./Footer";
 import Navbar from './Navbar';
 import Footernavigations from '../Footernavigations';
 import MiniProductCards from '../Pages/MiniProductCards';
-import CategoryCards from "../Components/CategoryCards";
 
 
 const Home = () => {
