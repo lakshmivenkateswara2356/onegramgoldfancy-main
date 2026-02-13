@@ -229,24 +229,25 @@ ${productDetails}
                     <h3 className="font-semibold text-lg">{item.name}</h3>
 
                     {/* NEW QUANTITY CONTROLS */}
-                    <div className="flex items-center gap-3 mt-2 text-sm">
-                      <span className="text-gray-500">Quantity</span>
-                      <div className="flex items-center border rounded-md overflow-hidden">
-                        <button
-                          onClick={() => handleDecrement(item.id)}
-                          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="px-4 py-1">{item.quantity}</span>
-                        <button
-                          onClick={() => handleIncrement(item.id)}
-                          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                    </div>
+                    <div className="mt-2 text-sm space-y-1">
+  <span className="text-gray-500">Quantity</span>
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => handleDecrement(item.id)}
+      className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded"
+    >
+      <Minus size={14} />
+    </button>
+    <span className="px-4 py-1">{item.quantity}</span>
+    <button
+      onClick={() => handleIncrement(item.id)}
+      className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded"
+    >
+      <Plus size={14} />
+    </button>
+  </div>
+</div>
+
 
                     <p className="mt-3 font-semibold text-[#B08A2E]">
                       ₹{item.price * item.quantity}
