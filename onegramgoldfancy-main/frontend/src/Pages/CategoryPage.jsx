@@ -39,7 +39,7 @@ const CategoryPage = () => {
 
   /* ---------------- Wishlist Handler ---------------- */
   const handleWishlist = (e, productId) => {
-    e.stopPropagation();
+    e.stopPropagation(); // prevent card click
     if (!user) {
       toast.error("Please login to use wishlist ❤️");
       return;
@@ -49,7 +49,7 @@ const CategoryPage = () => {
 
   /* ---------------- Add to Cart Handler ---------------- */
   const handleAddToCart = (e, product) => {
-    e.stopPropagation();
+    e.stopPropagation(); // prevent card click
     addToCart(product);
     toast.success("Product added to cart ✅");
   };
@@ -93,6 +93,7 @@ const CategoryPage = () => {
               return (
                 <div
                   key={product.id}
+                  onClick={() => navigate(`/product/${product.id}`)} // navigate to product details
                   className="group bg-white rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
                 >
                   {/* Image */}
@@ -128,22 +129,21 @@ const CategoryPage = () => {
                         {product.name}
                       </h2>
 
-                      {/* Price & Discount Row-wise */}
-                      <div className="mt-2 space-y-1">
+                      {/* Price & Discount column-wise */}
+                      <div className="mt-2 flex flex-col gap-1">
                         <p className="text-[15px] font-semibold text-[#B08A2E]">
                           Price: ₹{product.price}
                         </p>
-                       <div className="flex items-center gap-2">
-  <p className="text-sm text-gray-400 line-through">
-    ₹{product.oldPrice || product.price + 500}
-  </p>
-  {product.discount > 0 && (
-    <p className="text-green-600 text-xs font-medium">
-      {product.discount}% OFF
-    </p>
-  )}
-</div>
-
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-gray-400 line-through">
+                            ₹{product.oldPrice || product.price + 500}
+                          </p>
+                          {product.discount > 0 && (
+                            <p className="text-green-600 text-xs font-medium">
+                              {product.discount}% OFF
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -151,15 +151,15 @@ const CategoryPage = () => {
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
                       className="
-            mt-1 w-full py-2
-            rounded-md
-            border border-[#D4AF37]
-            text-[#D4AF37]
-            text-xs font-semibold
-            hover:bg-[#FFF1C1]
-            transition
-            active:scale-95
-          "
+                        mt-2 w-full py-2
+                        rounded-md
+                        border border-[#D4AF37]
+                        text-[#D4AF37]
+                        text-xs font-semibold
+                        hover:bg-[#FFF1C1]
+                        transition
+                        active:scale-95
+                      "
                     >
                       Add to Cart
                     </button>
@@ -169,6 +169,10 @@ const CategoryPage = () => {
             })}
           </div>
         )}
+
+        <div className="mt-12 text-center text-xs text-gray-500">
+          ✨ Premium quality · Trusted craftsmanship
+        </div>
       </div>
     </div>
   );
