@@ -19,7 +19,7 @@ const Footernavigations = () => {
     transition-all duration-300
     ${
       isActive
-        ? "fill-[#E6C873] text-[#E6C873] scale-110"
+        ? "fill-[#C9A24D] to-[#B08A2E] text-[#E6C873] scale-110"
         : "text-gray-400"
     }
   `;
