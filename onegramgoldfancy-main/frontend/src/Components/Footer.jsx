@@ -38,8 +38,20 @@ const Footer = () => {
 
       
       <div className="border-t border-gray-700 py-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()}  All rights reserved amalapuram ammayi sri OneGram Gold Fancy.powerd by Volna Technologies
-      </div>
+  © {new Date().getFullYear()} All rights reserved amalapuram ammayi sri OneGram Gold Fancy. 
+  Powered by{" "}
+  <a
+    href={`https://wa.me/917842802368?text=${encodeURIComponent(
+      "Hi Volna Technologies, we need a website for our business."
+    )}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-[#B08A2E] hover:underline"
+  >
+    Volna Technologies
+  </a>
+</div>
+
     </footer>
   );
 };
