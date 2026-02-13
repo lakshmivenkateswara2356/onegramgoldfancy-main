@@ -136,7 +136,9 @@ const Orders = () => {
                 <p className="font-bold text-[#B08A2E]">
                   ₹{order.total_amount || order.total}
                 </p>
+                
               </div>
+              
 
               <div>
                 <p className="text-gray-500 text-xs">Payment</p>

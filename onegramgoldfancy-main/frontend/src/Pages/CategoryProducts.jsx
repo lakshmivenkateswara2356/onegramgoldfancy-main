@@ -1,49 +1,105 @@
-import { useContext } from "react";
-import { useLocation } from "react-router-dom";
+import { useContext, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 
 const CategoryProducts = () => {
-  const { products } = useContext(AppContext);
+  const { products = [], loadingProducts } = useContext(AppContext);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // 🔹 Get type from URL
+  /* ---------------- Get type from URL ---------------- */
   const query = new URLSearchParams(location.search);
   const type = query.get("type");
 
-  // 🔹 Filter products
-  const filteredProducts = type
-    ? products.filter((product) =>
-        product.name.toLowerCase().includes(type.toLowerCase())
-      )
-    : products;
+  /* ---------------- Filter Products (Optimized) ---------------- */
+  const filteredProducts = useMemo(() => {
+    if (!type) return products;
 
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4 capitalize">
-        {type ? `${type} Products` : "All Products"}
-      </h2>
+    return products.filter((product) =>
+      product.name?.toLowerCase().includes(type.toLowerCase())
+    );
+  }, [products, type]);
 
-      {filteredProducts.length === 0 ? (
-        <p>No products found</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
+  /* ---------------- Loading Skeleton ---------------- */
+  if (loadingProducts) {
+    return (
+      <div className="bg-[#FAFAFA] min-h-screen pt-24 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {[...Array(10)].map((_, i) => (
             <div
-              key={product.id}
-              className="border rounded-lg p-4 shadow hover:shadow-lg transition"
+              key={i}
+              className="bg-white rounded-xl p-3 animate-pulse"
             >
-              <img
-                src={product.images?.[0]}
-                alt={product.name}
-                className="h-40 w-full object-cover rounded"
-              />
-              <h3 className="mt-2 font-semibold">{product.name}</h3>
-              <p className="text-sm text-gray-500">{product.category}</p>
-              <p className="font-bold mt-1">₹{product.price}</p>
+              <div className="h-40 bg-gray-200 rounded-lg mb-3" />
+              <div className="h-3 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
             </div>
           ))}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#FAFAFA] min-h-screen font-poppins pt-24 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Heading */}
+        <div className="mb-6 text-center">
+          <h2 className="text-[19px] font-semibold text-slate-800 capitalize">
+            {type ? `${type} Products` : "All Products"}
+          </h2>
+          <p className="text-slate-600 text-[13px]">
+            Handpicked premium collections
+          </p>
+        </div>
+
+        {/* Empty State */}
+        {filteredProducts.length === 0 ? (
+          <p className="text-center text-gray-500">
+            No products found
+          </p>
+        ) : (
+          /* Product Grid */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                onClick={() => navigate(`/product/${product.id}`)}
+                className="group bg-white rounded-xl border
+                shadow-sm hover:shadow-xl
+                hover:-translate-y-1 transition-all duration-300
+                cursor-pointer"
+              >
+                {/* Image */}
+                <div className="overflow-hidden rounded-t-xl">
+                  <img
+                    src={product.images?.[0] || product.image}
+                    alt={product.name}
+                    loading="lazy"
+                    className="h-40 w-full object-cover
+                    group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="p-3 space-y-1">
+                  <h3 className="text-sm font-medium line-clamp-2 text-gray-900">
+                    {product.name}
+                  </h3>
+
+                  <p className="text-xs text-gray-500 capitalize">
+                    {product.category}
+                  </p>
+
+                  <p className="text-[15px] font-semibold text-[#B08A2E]">
+                    ₹{product.price}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -67,13 +67,13 @@ const BannerCarousel = () => {
                 <div className="absolute inset-0 bg-black/40 flex items-end">
                   <div className="p-4 flex flex-col gap-2 max-w-[80%]">
                     {banner.title && (
-                      <h2 className="text-lg sm:text-xl md:text-4xl font-semibold text-yellow-400 leading-tight">
+                      <h2 className="text-lg sm:text-xl md:text-4xl font-semibold text-[#E6C873] leading-tight">
                         {banner.title}
                       </h2>
                     )}
 
                     {banner.paragraph && (
-                      <p className="text-xs sm:text-sm md:text-lg text-gray-200">
+                      <p className="text-xs sm:text-sm md:text-lg text-white font-bold">
                         {banner.paragraph}
                       </p>
                     )}
@@ -81,7 +81,8 @@ const BannerCarousel = () => {
                     {banner.button_text && (
                       <button
                         onClick={() => navigate("/products")}
-                        className="mt-1 w-fit px-4 py-1.5 rounded-full bg-yellow-400 text-black text-xs md:text-base font-semibold hover:bg-yellow-500 transition"
+                        className="mt-1 w-fit px-4 py-1.5 rounded-full bg-gradient-to-r from-[#C9A24D] to-[#B08A2E]
+           text-black text-xs md:text-base font-bold hover:bg-[#E6C873] transition"
                       >
                         {banner.button_text}
                       </button>
@@ -101,7 +102,7 @@ const BannerCarousel = () => {
               onClick={() => setCurrent(index)}
               className={`h-1.5 w-1.5 rounded-full transition ${
                 current === index
-                  ? "bg-yellow-400 scale-125"
+                  ? "bg-[#E6C873] scale-125"
                   : "bg-white/50"
               }`}
             />

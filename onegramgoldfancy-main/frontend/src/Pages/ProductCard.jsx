@@ -31,10 +31,11 @@ const ProductCard = ({ product }) => {
         overflow-hidden
         min-w-[160px]
         flex-shrink-0
+        h-55
       "
     >
       {/* IMAGE SECTION */}
-      <div className="relative h-44 bg-gray-100 overflow-hidden">
+      <div className="relative h-[114px] bg-gray-100 overflow-hidden">
         {/* Skeleton Loader */}
         {!imageLoaded && (
           <div className="absolute inset-0 animate-pulse bg-gray-200" />
@@ -71,14 +72,29 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* CONTENT */}
-      <div className="p-4">
+      <div className="p-1">
         <h3 className="text-sm font-medium text-gray-800 line-clamp-2">
           {product.name}
         </h3>
 
-        <p className="mt-2 text-sm font-semibold text-[#B08A2E]">
-          ₹ {product.price}
-        </p>
+        {/* Price & Discount Row-wise */}
+                      <div className="mt-2 space-y-1">
+                        
+                        <p className="text-[15px] font-semibold text-[#B08A2E]">
+                          Price: ₹{product.price}
+                        </p>
+                        <div className="flex items-center gap-2">
+  <p className="text-sm text-gray-400 line-through">
+    ₹{product.oldPrice || product.price + 500}
+  </p>
+  {product.discount > 0 && (
+    <p className="text-green-600 text-xs font-medium">
+      {product.discount}% OFF
+    </p>
+  )}
+</div>
+
+                      </div>
 
         {/* ADD TO CART */}
         <button
@@ -87,7 +103,7 @@ const ProductCard = ({ product }) => {
             addToCart(product);
           }}
           className="
-            mt-4 w-full py-2
+            mt-1 w-full py-2
             rounded-md
             border border-[#D4AF37]
             text-[#D4AF37]

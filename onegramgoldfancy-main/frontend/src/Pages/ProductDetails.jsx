@@ -50,9 +50,13 @@ export default function ProductDetails() {
 
       <div className="max-w-7xl mx-auto px-4 py-10">
         {/* BACK */}
-        <button
+         <button
           onClick={() => navigate(-1)}
-          className="text-sm text-gray-500 text-yellow-400 hover:text-gray-800 mb-6 pt-[32px]"
+          className="mt-[29px] inline-flex items-center gap-1 px-3 py-1.5
+          bg-gradient-to-r from-[#C9A24D] to-[#B08A2E]
+          text-white text-xs font-medium rounded-full
+          shadow hover:shadow-md hover:scale-[1.03]
+          transition-all duration-300"
         >
           ← Back
         </button>
@@ -62,13 +66,13 @@ export default function ProductDetails() {
           <div>
             {/* MAIN IMAGE */}
             <div
-              className="bg-white rounded-2xl shadow-lg p-4 cursor-zoom-in"
+              className="m-3 rounded-md shadow-lg  cursor-zoom-in"
               onClick={() => setIsPreviewOpen(true)}
             >
               <img
                 src={images[activeIndex]}
                 alt={product.name}
-                className="w-full h-[420px] object-cover rounded-xl"
+                className="w-full h-[420px]  rounded-xl"
               />
             </div>
 
@@ -97,45 +101,44 @@ export default function ProductDetails() {
 
           {/* DETAILS */}
           <div>
-            <h1 className="text-3xl font-semibold">{product.name}</h1>
+            <h1 className="text-[29px] mt-[-33px] font-semibold">{product.name}</h1>
 
-            <div className="mt-4">
-              <p className="text-sm text-gray-400 line-through">
-                ₹{product.oldPrice || product.price + 500}
-              </p>
-              <p className="text-4xl font-semibold text-[#C9A227]">
-                ₹{product.price}
-              </p>
+            <div className="mt-1">
+              
+              {/* Price & Discount Row-wise */}
+                      <div className="mt-2 space-y-1">
+                        <p className="text-[15px] font-semibold text-[#B08A2E]">
+                          Price: ₹{product.price}
+                        </p>
+                       <div className="flex items-center gap-2">
+  <p className="text-sm text-gray-400 line-through">
+    ₹{product.oldPrice || product.price + 500}
+  </p>
+  {product.discount > 0 && (
+    <p className="text-green-600 text-xs font-medium">
+      {product.discount}% OFF
+    </p>
+  )}
+</div>
+
+                      </div>
               <p className="text-xs text-gray-500 mt-1">
                 Inclusive of all taxes
               </p>
             </div>
 
             {/* TRUST */}
-            <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="mt-1 grid grid-cols-3 gap-3">
               <Trust icon={<ShieldCheck />} text="Premium Quality" />
               <Trust icon={<Truck />} text="Fast Delivery" />
               <Trust icon={<RotateCcw />} text="Easy Returns" />
             </div>
 
             {/* DESCRIPTION */}
-            <div className="mt-8">
-              <h3 className="text-sm font-semibold mb-2">
-                Product Highlights
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                {(product.description || [
-                  "Premium gold polish",
-                  "Handcrafted jewellery",
-                  "Long lasting shine",
-                ]).map((d, i) => (
-                  <li key={i}>• {d}</li>
-                ))}
-              </ul>
-            </div>
+            
 
             {/* CTA */}
-            <div className="mt-10 grid grid-cols-2 gap-4">
+            <div className="mt-6 grid grid-cols-2 gap-4">
               <button
                 onClick={() => addToCart(product)}
                 className="py-3 rounded-xl border border-[#C9A227] text-[#C9A227]
@@ -146,8 +149,8 @@ export default function ProductDetails() {
 
               <button
                 onClick={() => buyNow(product, navigate)}
-                className="py-3 rounded-xl bg-gradient-to-r from-[#C9A227] to-[#D4AF37]
-                text-white hover:opacity-90 transition"
+                className="py-3 rounded-xl bg-gradient-to-r from-[#C9A24D] to-[#B08A2E]
+                text-white font-bold hover:opacity-90 transition"
               >
                 Buy Now
               </button>
@@ -176,7 +179,7 @@ export default function ProductDetails() {
           <img
             src={images[activeIndex]}
             alt=""
-            className="h-[70vh] w-[90vw] rounded-xl"
+            className=" w-[90%] rounded-xl"
           />
 
           <button

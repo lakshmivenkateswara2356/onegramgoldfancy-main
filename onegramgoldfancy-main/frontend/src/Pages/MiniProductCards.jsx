@@ -15,13 +15,13 @@ const MiniProductCards = () => {
   }
 
   return (
-    <div className="w-full mt-6 px-4">
-      <h2 className="text-lg font-semibold text-black mb-3">
+    <div className="w-full mt-4 px-4">
+      <h2 className="text-lg font-semibold text-black ">
         Explore Collections
       </h2>
 
       {/* Scrollable Cards */}
-      <div className="flex gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth snap-x snap-mandatory">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar py-2 scroll-smooth snap-x snap-mandatory">
         {miniProducts.map((product) => (
           <div
             key={product.id}

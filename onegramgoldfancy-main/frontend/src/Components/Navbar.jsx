@@ -36,7 +36,7 @@ const Navbar = () => {
         {/* Logo */}
         <div
           onClick={() => goTo("/")}
-          className="cursor-pointer text-xl font-extrabold tracking-wider bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent"
+          className="cursor-pointer text-xl font-extrabold tracking-wider bg-gradient-to-r from-[#C9A24D] to-[#B08A2E] bg-clip-text text-transparent"
         >
          <div className="flex items-center">
   <img src={Businesslogo} alt="Logo" className="h-10 w-10 object-contain rounded-full" />

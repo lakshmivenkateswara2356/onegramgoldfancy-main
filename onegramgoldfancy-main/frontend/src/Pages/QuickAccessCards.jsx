@@ -23,7 +23,7 @@ const QuickAccessCards = () => {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/40 flex items-end">
-            <h3 className="p-3 text-sm sm:text-base font-semibold text-yellow-400">
+            <h3 className="p-3 text-sm sm:text-base font-bold text-[#E6C873]">
               Panchalohalu
             </h3>
           </div>
@@ -44,7 +44,7 @@ const QuickAccessCards = () => {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/40 flex items-end">
-            <h3 className="p-3 text-sm sm:text-base font-semibold text-yellow-400">
+            <h3 className="p-3 text-sm sm:text-base font-bold text-[#E6C873]">
               One Gram Gold
             </h3>
           </div>

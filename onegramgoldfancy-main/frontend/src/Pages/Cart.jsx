@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -84,7 +84,7 @@ const Cart = () => {
      SEND WHATSAPP TO ADMIN
   ============================ */
   const sendWhatsAppToAdmin = () => {
-    const adminNumber = "918179045317"; // +91 7842802368
+    const adminNumber = "918179045317";
 
     const productDetails = cart
       .map(
@@ -108,10 +108,7 @@ Image: ${item.image || "N/A"}
 ${productDetails}
 
 💰 *Total Amount*: ₹${subtotal}
-`
-
-;
-
+`;
 
     const whatsappURL = `https://wa.me/${adminNumber}?text=${encodeURIComponent(
       message
@@ -178,6 +175,19 @@ ${productDetails}
     }
   };
 
+  /* ============================
+     HANDLE INCREMENT / DECREMENT
+  ============================ */
+  const handleIncrement = (id) => {
+    const item = cart.find((i) => i.id === id);
+    if (item) updateQuantity(id, item.quantity + 1);
+  };
+
+  const handleDecrement = (id) => {
+    const item = cart.find((i) => i.id === id);
+    if (item && item.quantity > 1) updateQuantity(id, item.quantity - 1);
+  };
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       <Navbar />
@@ -185,7 +195,7 @@ ${productDetails}
       <div className="pt-24 px-5 max-w-7xl mx-auto grid md:grid-cols-[2fr_1fr] gap-10">
         {/* CART ITEMS */}
         <div>
-          <h1 className="text-2xl font-semibold mb-6">
+          <h1 className="text-[22px] font-semibold mb-6">
             Shopping Cart
             <span className="ml-2 text-sm text-gray-500">
               ({cart.length} items)
@@ -218,20 +228,24 @@ ${productDetails}
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{item.name}</h3>
 
+                    {/* NEW QUANTITY CONTROLS */}
                     <div className="flex items-center gap-3 mt-2 text-sm">
                       <span className="text-gray-500">Quantity</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQuantity(
-                            item.id,
-                            Math.max(1, Number(e.target.value))
-                          )
-                        }
-                        className="w-16 border rounded-md px-2 py-1"
-                      />
+                      <div className="flex items-center border rounded-md overflow-hidden">
+                        <button
+                          onClick={() => handleDecrement(item.id)}
+                          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="px-4 py-1">{item.quantity}</span>
+                        <button
+                          onClick={() => handleIncrement(item.id)}
+                          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     <p className="mt-3 font-semibold text-[#B08A2E]">
@@ -269,9 +283,7 @@ ${productDetails}
               <PhoneInput
                 country={"in"}
                 value={guest.phone}
-                onChange={(phone) =>
-                  setGuest({ ...guest, phone })
-                }
+                onChange={(phone) => setGuest({ ...guest, phone })}
                 inputClass="w-full border rounded-lg px-3 py-2"
               />
 
