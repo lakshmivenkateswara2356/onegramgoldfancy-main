@@ -65,7 +65,7 @@ const BannerCarousel = () => {
             >
               {(banner.title || banner.paragraph) && (
                 <div className="absolute inset-0 bg-black/40 flex items-end">
-                  <div className="p-4 flex flex-col gap-2 max-w-[80%]">
+                  <div className="p-4 flex flex-col gap-0 max-w-[80%]">
                     {banner.title && (
                       <h2 className="text-lg sm:text-xl md:text-4xl font-semibold text-[#E6C873] leading-tight">
                         {banner.title}

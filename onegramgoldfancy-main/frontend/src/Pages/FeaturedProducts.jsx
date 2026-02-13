@@ -18,7 +18,7 @@ const FeaturedProducts = () => {
     loadingProducts || featuredProducts.length === 0;
 
   return (
-    <section className="mt-1 px-4">
+    <section className="mt-[-2px] px-4">
       
       {/* HEADER */}
       <div className="flex items-center justify-between mb-1">

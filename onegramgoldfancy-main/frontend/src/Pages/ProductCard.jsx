@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
         </h3>
 
         {/* Price & Discount Row-wise */}
-                      <div className="mt-2 space-y-1">
+                      <div className=" ">
                         
                         <p className="text-[15px] font-semibold text-[#B08A2E]">
                           Price: ₹{product.price}
