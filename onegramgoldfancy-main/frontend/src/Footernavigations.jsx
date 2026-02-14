@@ -5,43 +5,32 @@ import { Home, ShoppingBag, Heart, User } from "lucide-react";
 const Footernavigations = () => {
   const linkClasses = ({ isActive }) =>
     `
-    relative flex flex-col items-center justify-center
-    text-xs transition-all duration-300
-    ${isActive ? "font-semibold" : "text-gray-400"}
+    flex flex-col items-center gap-0.5 text-xs
+    transition-all duration-300 ease-out
+    ${
+      isActive
+        ? "text-yellow-400 font-semibold -translate-y-2"
+        : "text-gray-400"
+    }
   `;
 
- const iconWrapper = (isActive) =>
-  `
-  relative flex items-center justify-center
-  w-12 h-12 transition-all duration-300
-  ${
-    isActive
-      ? `
-        bg-gradient-to-r from-[#C9A24D] to-[#B08A2E]
-        rounded-full text-black
-        shadow-[0_0_12px_rgba(201,162,77,0.8)]
-        before:content-['']
-        before:absolute before:-inset-1
-        before:rounded-full
-        before:bg-white
-        before:-z-10
-        font-bold
-      `
-      : "text-gray-400"
-  }
-`;
-
+  const iconClasses = (isActive) =>
+    `
+    transition-all duration-300
+    ${
+      isActive
+        ? "fill-[#C9A24D] to-[#B08A2E] text-[#E6C873] scale-110"
+        : "text-gray-400"
+    }
+  `;
 
   return (
-    <footer className="fixed bottom-0 w-full h-[72px] bg-black flex justify-around items-center border-t border-gray-800 overflow-hidden z-50 lg:hidden">
-      
+    <footer className="fixed bottom-0 w-full h-[60px] bg-black flex justify-around items-center border-t border-gray-800 z-50 lg:hidden">
       <NavLink to="/" className={linkClasses}>
         {({ isActive }) => (
           <>
-            <div className={iconWrapper(isActive)}>
-              <Home size={22} />
-            </div>
-           
+            <Home size={22} className={iconClasses(isActive)} />
+            <span>Home</span>
           </>
         )}
       </NavLink>
@@ -49,10 +38,8 @@ const Footernavigations = () => {
       <NavLink to="/products" className={linkClasses}>
         {({ isActive }) => (
           <>
-            <div className={iconWrapper(isActive)}>
-              <ShoppingBag size={22} />
-            </div>
-           
+            <ShoppingBag size={22} className={iconClasses(isActive)} />
+            <span>Products</span>
           </>
         )}
       </NavLink>
@@ -60,10 +47,8 @@ const Footernavigations = () => {
       <NavLink to="/favorites" className={linkClasses}>
         {({ isActive }) => (
           <>
-            <div className={iconWrapper(isActive)}>
-              <Heart size={22} />
-            </div>
-            
+            <Heart size={22} className={iconClasses(isActive)} />
+            <span>Wishlist</span>
           </>
         )}
       </NavLink>
@@ -71,14 +56,11 @@ const Footernavigations = () => {
       <NavLink to="/account" className={linkClasses}>
         {({ isActive }) => (
           <>
-            <div className={iconWrapper(isActive)}>
-              <User size={22} />
-            </div>
-            
+            <User size={22} className={iconClasses(isActive)} />
+            <span>Profile</span>
           </>
         )}
       </NavLink>
-
     </footer>
   );
 };
