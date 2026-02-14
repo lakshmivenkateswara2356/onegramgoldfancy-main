@@ -41,9 +41,7 @@ const Footernavigations = () => {
             <div className={iconWrapper(isActive)}>
               <Home size={22} />
             </div>
-            <span className={`mt-1 ${isActive ? "text-yellow-400" : ""}`}>
-              Home
-            </span>
+           
           </>
         )}
       </NavLink>
@@ -54,9 +52,7 @@ const Footernavigations = () => {
             <div className={iconWrapper(isActive)}>
               <ShoppingBag size={22} />
             </div>
-            <span className={`mt-1 ${isActive ? "text-yellow-400" : ""}`}>
-              Products
-            </span>
+           
           </>
         )}
       </NavLink>
@@ -67,9 +63,7 @@ const Footernavigations = () => {
             <div className={iconWrapper(isActive)}>
               <Heart size={22} />
             </div>
-            <span className={`mt-1 ${isActive ? "text-yellow-400" : ""}`}>
-              Wishlist
-            </span>
+            
           </>
         )}
       </NavLink>
@@ -80,9 +74,7 @@ const Footernavigations = () => {
             <div className={iconWrapper(isActive)}>
               <User size={22} />
             </div>
-            <span className={`mt-1 ${isActive ? "text-yellow-400" : ""}`}>
-              Profile
-            </span>
+            
           </>
         )}
       </NavLink>
