@@ -10,7 +10,7 @@ import MiniProductCards from '../Pages/MiniProductCards';
 
 const Home = () => {
     return (
-        <div>
+        <div >
              < Navbar/>
             <Banner/>
             <Quicku/>
