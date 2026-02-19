@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import Businesslogo from "../Assets/logob.png";
+import { Home, ShoppingBag, Heart, User } from "lucide-react";
+
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,10 +52,10 @@ const Navbar = () => {
         {/* Desktop Menu */}
         <ul className="hidden md:flex gap-8 text-sm font-medium text-white">
           <li onClick={() => goTo("/")} className="hover:text-[red] cursor-pointer">Home</li>
-          <li onClick={() => goTo("/collections")} className="hover:text-[#B08A2E] cursor-pointer">Collections</li>
-          <li onClick={() => goTo("/new-arrivals")} className="hover:text-[#B08A2E] cursor-pointer">New Arrivals</li>
+          <li onClick={() => goTo("/products")} className="hover:text-[#B08A2E] cursor-pointer">Products</li>
+          <li onClick={() => goTo("/favorites")} className="hover:text-[#B08A2E] cursor-pointer">Favorites</li>
           <li onClick={() => goTo("/about")} className="hover:text-[#B08A2E] cursor-pointer">About</li>
-          <li onClick={() => goTo("/contact")} className="hover:text-[#B08A2E] cursor-pointer">Contact</li>
+          <li onClick={() => goTo("/account")} className="hover:text-[#B08A2E] cursor-pointer">Account</li>
         </ul>
 
         {/* Right Icons */}
