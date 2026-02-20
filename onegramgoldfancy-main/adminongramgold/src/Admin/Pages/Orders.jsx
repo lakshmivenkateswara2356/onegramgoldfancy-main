@@ -11,7 +11,6 @@ const Orders = () => {
     tracking_id: "",
     courier_name: "",
   });
-
   const handleEditClick = (order) => {
     setEditing(order.id);
     setTrackingInfo({
@@ -19,7 +18,6 @@ const Orders = () => {
       courier_name: order.courier_name || "",
     });
   };
-
   const handleSave = async (order) => {
     try {
       const token = localStorage.getItem("adminToken");
@@ -42,14 +40,12 @@ const Orders = () => {
       );
 
       if (!res.ok) throw new Error("Failed");
-
       setEditing(null);
       fetchOrders();
 
       if (order.phone) {
         const message = `Hi ${order.customer} 👋
 Your order is shipped 🚚
-
 Order ID: ${order.id}
 Courier: ${trackingInfo.courier_name}
 Tracking ID: ${trackingInfo.tracking_id}

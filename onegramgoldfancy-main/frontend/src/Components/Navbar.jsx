@@ -100,11 +100,11 @@ const Navbar = () => {
           </button>
 
           <ul className="space-y-5 text-lg font-medium text-white">
-            <li onClick={() => goTo("/")}>Home</li>
-            <li onClick={() => goTo("/collections")}>Collections</li>
-            <li onClick={() => goTo("/new-arrivals")}>New Arrivals</li>
-            <li onClick={() => goTo("/about")}>About</li>
-            <li onClick={() => goTo("/contact")}>Contact</li>
+          <li onClick={() => goTo("/")} className="hover:text-[red] cursor-pointer">Home</li>
+          <li onClick={() => goTo("/products")} className="hover:text-[#B08A2E] cursor-pointer">Products</li>
+          <li onClick={() => goTo("/favorites")} className="hover:text-[#B08A2E] cursor-pointer">Favorites</li>
+          <li onClick={() => goTo("/about")} className="hover:text-[#B08A2E] cursor-pointer">About</li>
+          <li onClick={() => goTo("/account")} className="hover:text-[#B08A2E] cursor-pointer">Account</li>
           </ul>
 
           <button
