@@ -7,7 +7,7 @@ const MainLayout = () => {
     <>
       <Navbar />
       {/* Padding bottom for fixed footer */}
-      <main className="pt-[0px] pb-[0px] md:pb-[60px]">
+      <main className="pt-[0px] pb-[0px] sm:pb-[60px]">
         <Outlet />
       </main>
       <Footernavigations />
