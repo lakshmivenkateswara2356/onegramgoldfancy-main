@@ -18,6 +18,7 @@ const OneGramGold = () => {
   const navigate = useNavigate();
   const oneGramGoldProducts = products?.["one-gram-gold"] || [];
 
+
   /* ---------------- Loading Skeleton ---------------- */
   if (loadingProducts) {
     return (

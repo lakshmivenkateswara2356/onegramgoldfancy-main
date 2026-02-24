@@ -72,7 +72,7 @@ export default function ProductDetails() {
               <img
                 src={images[activeIndex]}
                 alt={product.name}
-                className="w-full h-[420px]  rounded-xl"
+                className="rounded-xl"
               />
             </div>
 

@@ -94,6 +94,7 @@ const Panchalohalu = () => {
                   hover:-translate-y-1 transition-all duration-300
                   cursor-pointer"
                 >
+                  
                   {/* Image */}
                   <div className="relative overflow-hidden rounded-t-xl">
                     <img
