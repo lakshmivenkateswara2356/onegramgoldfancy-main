@@ -3,18 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-// ✅ Import DB connection
+// ✅ Import DB connection (update config/db.js to use DATABASE_URL)
 const pool = require("./config/db");
-
-// Routes
-const authRoutes = require("./routes/auth.routes");
-const wishlistRoutes = require("./routes/wishlist.routes");
-const orderRoutes = require("./routes/order.routes");
-const adminRoutes = require("./routes/admin.routes");
-const productRoutes = require("./routes/product.routes");
-const cartRoutes = require("./routes/cart.routes");
-const bannerRoutes = require("./routes/banners.routes");
-const userRoutes = require("./routes/users.routes");
 
 const app = express();
 
@@ -22,13 +12,11 @@ const app = express();
 app.use(
   cors({
     origin: [
-    "https://amalapuramammayisri.com",
-    "https://onegramgoldfancyadmin.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:3001"
-
-   
-  ], // replace with frontend URL in production
+      "https://amalapuramammayisri.com",
+      "https://onegramgoldfancyadmin.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -40,14 +28,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // -------------------- ROUTES --------------------
-app.use("/api/auth", authRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/banners", bannerRoutes);
-app.use("/api/wishlist", wishlistRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/orders", require("./routes/order.routes"));
+app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/products", require("./routes/product.routes"));
+app.use("/api/cart", require("./routes/cart.routes"));
+app.use("/api/banners", require("./routes/banners.routes"));
+app.use("/api/wishlist", require("./routes/wishlist.routes"));
+app.use("/api/users", require("./routes/users.routes"));
 
 // -------------------- ROOT --------------------
 app.get("/", (req, res) => {
@@ -67,8 +55,22 @@ app.get("/api/db-test", async (req, res) => {
 
 // -------------------- START SERVER --------------------
 const PORT = process.env.PORT || 5000;
+
 pool.connect()
-  .then(() => console.log("✅ PostgreSQL connected successfully"))
-  .catch((err) => console.error("❌ PostgreSQL connection failed:", err.message));
+  .then(() => {
+    console.log("✅ PostgreSQL connected successfully");
+
+    // ⚡ OPTIONAL: check if tables exist (example)
+    pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema='public';
+    `)
+      .then(res => console.log("Tables in DB:", res.rows.map(r => r.table_name)))
+      .catch(err => console.error("Error fetching tables:", err.message));
+  })
+  .catch((err) =>
+    console.error("❌ PostgreSQL connection failed:", err.message)
+  );
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
