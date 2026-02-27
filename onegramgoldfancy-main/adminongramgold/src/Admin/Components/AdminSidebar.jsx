@@ -18,7 +18,7 @@ const AdminSidebar = () => {
       {/* ===== MOBILE ARROW BUTTON ===== */}
       <button
         onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-1/2 left-0 -translate-y-1/2 z-50 bg-black text-white p-2 rounded-r-lg shadow-lg"
+        className="md:hidden  fixed top-1/2 left-0 -translate-y-1/2 z-50 bg-black text-white p-2 rounded-r-lg shadow-lg"
       >
         {open ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
       </button>
@@ -33,7 +33,7 @@ const AdminSidebar = () => {
 
       {/* ===== SIDEBAR ===== */}
       <aside
-        className={`fixed md:static top-0 left-0 h-full 
+        className={`fixed md:static top-0 left-0 h-[60rem]
         w-56 md:w-64 bg-black text-white p-5 z-50
         transform transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
