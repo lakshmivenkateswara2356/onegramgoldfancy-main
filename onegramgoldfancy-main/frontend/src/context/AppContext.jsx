@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, useCallback } from "react";
+import { createContext, useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import WelcomeModal from "../Pages/WelcomeModal";
@@ -6,6 +6,7 @@ import WelcomeModal from "../Pages/WelcomeModal";
 export const AppContext = createContext(null);
 
 const AppProvider = ({ children }) => {
+
   /* ------------------ UI ------------------ */
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -17,17 +18,25 @@ const AppProvider = ({ children }) => {
 
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
+  // 🔥 Track previous user (important)
+  const previousUserRef = useRef(user);
+
   useEffect(() => {
+    const previousUser = previousUserRef.current;
+
+    // Save/remove localStorage
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
-      if (!localStorage.getItem("welcomeShown")) {
-        setShowWelcomeModal(true);
-        localStorage.setItem("welcomeShown", "true");
-      }
     } else {
       localStorage.removeItem("user");
-      localStorage.removeItem("welcomeShown");
     }
+
+    // ✅ Detect fresh login (null → user)
+    if (!previousUser && user) {
+      setShowWelcomeModal(true);
+    }
+
+    previousUserRef.current = user;
   }, [user]);
 
   /* ------------------ GUEST ------------------ */
@@ -155,7 +164,7 @@ const AppProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  /* ------------------ ❤️ WISHLIST (ONLY FIXED PART) ------------------ */
+  /* ------------------ ❤️ WISHLIST ------------------ */
   const [wishlist, setWishlist] = useState([]);
 
   const fetchWishlist = useCallback(async () => {
@@ -190,7 +199,6 @@ const AppProvider = ({ children }) => {
         setWishlist((prev) => prev.filter((id) => id !== productId));
         toast.success("Removed from favorites");
       } else {
-        // ✅ FIX: POST without :id
         await axios.post(
           `${API}/wishlist`,
           { productId },
@@ -215,6 +223,7 @@ const AppProvider = ({ children }) => {
     const cached = localStorage.getItem("cachedBanners");
     return cached ? JSON.parse(cached) : [];
   });
+
   const [loadingBanners, setLoadingBanners] = useState(true);
 
   const fetchBanners = async () => {
@@ -242,6 +251,7 @@ const AppProvider = ({ children }) => {
       if (exists) return prev;
       return [...prev, { ...product, quantity: 1 }];
     });
+
     toast.success("Proceeding to checkout 💳");
     navigate("/cart");
   };
@@ -273,6 +283,7 @@ const AppProvider = ({ children }) => {
     >
       {children}
 
+      {/* ✅ Welcome shows instantly after login */}
       {showWelcomeModal && (
         <WelcomeModal
           userName={user?.name || "User"}
