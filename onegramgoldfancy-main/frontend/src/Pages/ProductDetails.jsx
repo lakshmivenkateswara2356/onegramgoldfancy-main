@@ -101,7 +101,7 @@ export default function ProductDetails() {
 
           {/* DETAILS */}
           <div>
-            <h1 className="text-[29px] mt-[-33px] font-semibold">{product.name}</h1>
+            <h1 className="text-[22px] mt-[-33px] font-semibold">{product.name}</h1>
 
             <div className="mt-1">
               
